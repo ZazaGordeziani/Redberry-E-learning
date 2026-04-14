@@ -4,9 +4,8 @@ export const PageContainer: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
     return (
-        <main className="flex grow justify-center overflow-hidden">
-            {children}{' '}
+        <main className="flex w-full grow flex-col items-center">
+            {children}
         </main>
     )
 }
-

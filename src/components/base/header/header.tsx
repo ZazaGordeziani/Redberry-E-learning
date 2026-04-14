@@ -17,26 +17,27 @@ export default function Header() {
                 <div className="flex items-center gap-9">
                     <button
                         type="button"
-                        className="font-inter flex items-center gap-2 text-xl leading-5 font-normal text-black"
+                        className="font-inter flex items-center gap-2 text-xl leading-6 font-normal text-black"
                     >
                         <img
                             src={browseCoursesIcon}
                             alt=""
                             aria-hidden="true"
+                            className="h-5 w-5"
                         />
                         <span>Browse Courses</span>
                     </button>
 
-                    <div className="font-inter flex items-center gap-4 text-xl leading-5 font-normal">
+                    <div className="font-inter flex items-center gap-2 text-xl leading-6 font-normal">
                         <button
                             type="button"
-                            className="rounded-lg border-2 border-[#958FEF] px-5 py-3 text-[#4F46E5]"
+                            className="rounded-lg border-2 border-[#958FEF] bg-white px-4 py-3 text-[#958FEF]"
                         >
                             Log In
                         </button>
                         <button
                             type="button"
-                            className="rounded-lg border-2 border-[#4F46E5] bg-[#4F46E5] px-6 py-3 text-white"
+                            className="rounded-lg border-2 border-[#4F46E5] bg-[#4F46E5] px-4 py-3 text-white"
                         >
                             Sign Up
                         </button>
