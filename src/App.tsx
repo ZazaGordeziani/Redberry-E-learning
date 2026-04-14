@@ -1,14 +1,31 @@
 import './App.css'
-import Header from './components/base/header/header'
-import Footer from './components/base/footer/footer'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
+
+import NotFoundPage from '@/pages/404'
+import { BounceLoader } from 'react-spinners'
+
+const LazyDefaultLayout = lazy(() => import('@/layout/default'))
 
 function App() {
     return (
-        <section className="mx-auto flex min-h-screen max-h-[1080px] w-full max-w-[1920px] flex-col overflow-x-hidden">
-            <Header />
-            <div className="flex-1" />
-            <Footer />
-        </section>
+        <BrowserRouter>
+            <Suspense
+                fallback={
+                    <div className="flex min-h-screen w-full items-center justify-center">
+                        <BounceLoader color="#4F46E5" />
+                    </div>
+                }
+            >
+                <Routes>
+                    <Route path="/" element={<LazyDefaultLayout />}>
+                        <Route index element={<div />} />
+                    </Route>
+
+                    <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+            </Suspense>
+        </BrowserRouter>
     )
 }
 
