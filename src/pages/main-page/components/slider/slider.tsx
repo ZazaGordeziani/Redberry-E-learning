@@ -52,7 +52,7 @@ export const MainPageSlider = () => {
     const activeSlide = slides[activeIndex]
 
     return (
-        <section className="pt-12 pb-12">
+        <section className="pt-14 pb-12">
             <div className="mx-auto w-full max-w-391.5">
                 <div className="relative h-105 w-full overflow-hidden rounded-[30px]">
                     <img
