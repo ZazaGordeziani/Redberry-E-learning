@@ -55,6 +55,7 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
     const [showPassword, setShowPassword] = useState(true)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [formError, setFormError] = useState<string | null>(null)
+    const [isDragActive, setIsDragActive] = useState(false)
     const [stepTriedNext, setStepTriedNext] = useState({
         email: false,
         password: false,
@@ -460,24 +461,27 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                 avatarRef.current?.click()
                             }
 
+                            const handleFile = (file: File) => {
+                                if (file.size > 1 * 1024 * 1024) {
+                                    setError('avatar', {
+                                        type: 'manual',
+                                        message: 'File size must be less than 1MB',
+                                    })
+                                    if (avatarRef.current)
+                                        avatarRef.current.value = ''
+                                    return
+                                }
+                                clearErrors('avatar')
+                                onChange(file)
+                            }
+
                             const handleFileChange = async (
                                 e: React.ChangeEvent<HTMLInputElement>,
                             ) => {
                                 const file = e.target.files?.[0]
 
                                 if (file) {
-                                    if (file.size > 1 * 1024 * 1024) {
-                                        setError('avatar', {
-                                            type: 'manual',
-                                            message:
-                                                'File size must be less than 1MB',
-                                        })
-                                        if (avatarRef.current)
-                                            avatarRef.current.value = ''
-                                        return
-                                    }
-                                    clearErrors('avatar')
-                                    onChange(file)
+                                    handleFile(file)
                                 }
                             }
 
@@ -537,7 +541,33 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                             role="button"
                                             aria-label="Upload avatar"
                                             onClick={handleClick}
-                                            className="mt-2 flex h-35 w-90 flex-col items-center justify-center rounded-lg border-[1.5px] border-[#D1D1D1]"
+                                            onDragEnter={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                setIsDragActive(true)
+                                            }}
+                                            onDragOver={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                setIsDragActive(true)
+                                            }}
+                                            onDragLeave={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                setIsDragActive(false)
+                                            }}
+                                            onDrop={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                setIsDragActive(false)
+                                                const file = e.dataTransfer.files?.[0]
+                                                if (file) handleFile(file)
+                                            }}
+                                            className={`mt-2 flex h-35 w-90 cursor-pointer flex-col items-center justify-center rounded-lg border-[1.5px] ${
+                                                isDragActive
+                                                    ? 'border-[#4F46E5] bg-[#EEEDFC]'
+                                                    : 'border-[#D1D1D1] bg-white'
+                                            }`}
                                         >
                                             <img
                                                 src={uploadAvatarIcon}
