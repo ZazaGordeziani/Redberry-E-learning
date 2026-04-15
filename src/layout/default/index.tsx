@@ -6,10 +6,12 @@ import Header from '../../components/base/header/header'
 import { PageContainer } from '../../components/base/page-container/page-container'
 import Register from '../../pages/modals/register/register'
 import Login from '../../pages/modals/login/login'
+import Profile from '../../pages/modals/profile/profile'
 
 const DefaultLayout = () => {
     const [isRegisterOpen, setIsRegisterOpen] = useState(false)
     const [isLoginOpen, setIsLoginOpen] = useState(false)
+    const [isProfileOpen, setIsProfileOpen] = useState(false)
 
     return (
         <div className="min-h-screen bg-white">
@@ -17,6 +19,7 @@ const DefaultLayout = () => {
                 <Header
                     onLoginClick={() => setIsLoginOpen(true)}
                     onSignUpClick={() => setIsRegisterOpen(true)}
+                    onProfileClick={() => setIsProfileOpen(true)}
                 />
                 <PageContainer>
                     <Outlet />
@@ -34,6 +37,7 @@ const DefaultLayout = () => {
                 onClose={() => setIsRegisterOpen(false)}
                 onOpenLogin={() => setIsLoginOpen(true)}
             />
+            <Profile open={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
         </div>
     )
 }

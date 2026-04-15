@@ -57,10 +57,15 @@ export const Login = ({ open, onClose, onOpenRegister }: Props) => {
             if (data?.user?.username)
                 localStorage.setItem('username', data.user.username)
             setUser({
+                id: data?.user?.id,
                 email: data?.user?.email,
                 username: data?.user?.username,
                 token: data?.token,
                 avatar: data?.user?.avatar ?? undefined,
+                fullName: data?.user?.fullName ?? null,
+                mobileNumber: data?.user?.mobileNumber ?? null,
+                age: data?.user?.age ?? null,
+                profileComplete: data?.user?.profileComplete ?? false,
             })
             console.log('user logged in successfully')
             console.log(data?.user?.email, data?.user?.username)
