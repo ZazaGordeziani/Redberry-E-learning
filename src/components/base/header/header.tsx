@@ -2,6 +2,7 @@ import logo from '@/assets/logo.svg'
 import browseCoursesIcon from '@/assets/browse-course-sign.svg'
 import enrolledCoursesIcon from '@/assets/enrolled-courses-sign.svg'
 import profileIcon from '@/assets/profile-sign.svg'
+import greenDotIcon from '@/assets/green-dot.svg'
 import { useAtomValue } from 'jotai'
 import { userAtom } from '@/store/auth'
 // import { Link } from 'react-router-dom'
@@ -9,11 +10,13 @@ import { userAtom } from '@/store/auth'
 type Props = {
     onLoginClick?: () => void
     onSignUpClick?: () => void
+    onProfileClick?: () => void
 }
 
 export default function Header({
     onLoginClick,
     onSignUpClick,
+    onProfileClick,
 }: Readonly<Props>) {
     const user = useAtomValue(userAtom)
     const isLoggedIn = !!user?.token
@@ -58,8 +61,43 @@ export default function Header({
                                 <span>Enrolled Courses</span>
                             </button>
 
-                            <button type="button" className="cursor-pointer">
-                                <img src={profileIcon} alt="Profile" />
+                            <button
+                                type="button"
+                                className="cursor-pointer"
+                                onClick={onProfileClick}
+                                aria-label="Open profile"
+                            >
+                                <span className="relative block h-14 w-14">
+                                    {user?.avatar ? (
+                                        <img
+                                            src={user.avatar}
+                                            alt="Profile"
+                                            className="h-14 w-14 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <img
+                                            src={profileIcon}
+                                            alt="Profile"
+                                            className="h-14 w-14"
+                                        />
+                                    )}
+
+                                    {user?.profileComplete ? (
+                                        <img
+                                            src={greenDotIcon}
+                                            alt=""
+                                            aria-hidden="true"
+                                            className="absolute right-0 bottom-0 h-4.5 w-4.5"
+                                        />
+                                    ) : null}
+
+                                    {!user?.profileComplete && user?.avatar ? (
+                                        <span
+                                            className="absolute right-0 bottom-0 h-4.5 w-4.5 rounded-full border-2 border-white"
+                                            style={{ backgroundColor: '#F4A316' }}
+                                        />
+                                    ) : null}
+                                </span>
                             </button>
                         </div>
                     ) : (
