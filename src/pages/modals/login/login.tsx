@@ -9,6 +9,8 @@ import hidePasswordIcon from '@/assets/hide-password.svg'
 import showPasswordIcon from '@/assets/show-password.svg'
 
 import { login } from '@/api/auth'
+import { useSetAtom } from 'jotai'
+import { userAtom } from '@/store/auth'
 
 import { LoginFormSchema } from './schema'
 
@@ -32,6 +34,7 @@ export const Login = ({ open, onClose, onOpenRegister }: Props) => {
     const [showPassword, setShowPassword] = useState(true)
     const [formError, setFormError] = useState<string | null>(null)
     const [invalidCredentials, setInvalidCredentials] = useState(false)
+    const setUser = useSetAtom(userAtom)
 
     const iconErrorFilter = invalidCredentials
         ? 'invert(24%) sepia(94%) saturate(6250%) hue-rotate(356deg) brightness(98%) contrast(115%)'
@@ -53,6 +56,14 @@ export const Login = ({ open, onClose, onOpenRegister }: Props) => {
                 localStorage.setItem('email', data.user.email)
             if (data?.user?.username)
                 localStorage.setItem('username', data.user.username)
+            setUser({
+                email: data?.user?.email,
+                username: data?.user?.username,
+                token: data?.token,
+                avatar: data?.user?.avatar ?? undefined,
+            })
+            console.log('user logged in successfully')
+            console.log(data?.user?.email, data?.user?.username)
             onClose()
         } catch (e) {
             const err = e as AxiosError
