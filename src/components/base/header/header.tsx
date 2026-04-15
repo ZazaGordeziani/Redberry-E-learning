@@ -3,10 +3,11 @@ import browseCoursesIcon from '@/assets/browse-course-sign.svg'
 // import { Link } from 'react-router-dom'
 
 type Props = {
+    onLoginClick?: () => void
     onSignUpClick?: () => void
 }
 
-export default function Header({ onSignUpClick }: Readonly<Props>) {
+export default function Header({ onLoginClick, onSignUpClick }: Readonly<Props>) {
     return (
         <header className="mx-auto flex h-27 w-full max-w-480 items-center justify-center border-b border-[#D1D1D1] bg-[#f5f5f5]">
             <div className="flex h-15 w-full max-w-391.5 items-center justify-between">
@@ -36,6 +37,7 @@ export default function Header({ onSignUpClick }: Readonly<Props>) {
                         <button
                             type="button"
                             className="h-15 w-28.5 rounded-lg border-2 border-[#958FEF] bg-white px-4 py-3 text-[#958FEF]"
+                            onClick={onLoginClick}
                         >
                             Log In
                         </button>

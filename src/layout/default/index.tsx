@@ -5,23 +5,34 @@ import Footer from '../../components/base/footer/footer'
 import Header from '../../components/base/header/header'
 import { PageContainer } from '../../components/base/page-container/page-container'
 import Register from '../../pages/modals/register/register'
+import Login from '../../pages/modals/login/login'
 
 const DefaultLayout = () => {
     const [isRegisterOpen, setIsRegisterOpen] = useState(false)
+    const [isLoginOpen, setIsLoginOpen] = useState(false)
 
     return (
         <div className="min-h-screen bg-white">
             <section className="mx-auto flex min-h-screen w-full max-w-480 flex-col overflow-x-hidden bg-[#F5F5F5]">
-                <Header onSignUpClick={() => setIsRegisterOpen(true)} />
+                <Header
+                    onLoginClick={() => setIsLoginOpen(true)}
+                    onSignUpClick={() => setIsRegisterOpen(true)}
+                />
                 <PageContainer>
                     <Outlet />
                 </PageContainer>
                 <Footer />
             </section>
 
+            <Login
+                open={isLoginOpen}
+                onClose={() => setIsLoginOpen(false)}
+                onOpenRegister={() => setIsRegisterOpen(true)}
+            />
             <Register
                 open={isRegisterOpen}
                 onClose={() => setIsRegisterOpen(false)}
+                onOpenLogin={() => setIsLoginOpen(true)}
             />
         </div>
     )

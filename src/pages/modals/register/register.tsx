@@ -21,6 +21,7 @@ import { SignUpFormSchema } from './schema'
 type Props = {
     open: boolean
     onClose: () => void
+    onOpenLogin: () => void
 }
 
 const StepBars = ({ step }: { step: 0 | 1 | 2 }) => {
@@ -48,7 +49,7 @@ const StepBars = ({ step }: { step: 0 | 1 | 2 }) => {
     )
 }
 
-export const Register = ({ open, onClose }: Props) => {
+export const Register = ({ open, onClose, onOpenLogin }: Props) => {
     const avatarRef = useRef<HTMLInputElement>(null)
     const [step, setStep] = useState<0 | 1 | 2>(0)
     const [showPassword, setShowPassword] = useState(true)
@@ -65,6 +66,16 @@ export const Register = ({ open, onClose }: Props) => {
             defaultValues: RegisterFormDefaultValues,
             mode: 'onBlur',
         })
+
+    const usernameValue = useWatch({ control, name: 'username' }) ?? ''
+    const shouldShowUsernameError =
+        !!formState.errors.username && usernameValue.length > 0
+
+    const passwordMismatch =
+        step === 1 && formState.errors.confirmPassword?.message === 'Passwords do not match'
+    const iconErrorFilter = passwordMismatch
+        ? 'invert(24%) sepia(94%) saturate(6250%) hue-rotate(356deg) brightness(98%) contrast(115%)'
+        : undefined
 
     const { mutate: handleRegister, isPending } = useRegister({
         onError: (error) => {
@@ -134,7 +145,16 @@ export const Register = ({ open, onClose }: Props) => {
             return (
                 <>
                     <div className="mt-6">
-                        <p className="font-inter text-[14px] leading-3.5 font-medium text-[#3D3D3D]">
+                        <p
+                            className={`font-inter text-[14px] leading-3.5 font-medium ${
+                                formState.errors.email &&
+                                ((formState.touchedFields.email ?? false) ||
+                                    stepTriedNext.email ||
+                                    formState.submitCount > 0)
+                                    ? 'text-red-500'
+                                    : 'text-[#3D3D3D]'
+                            }`}
+                        >
                             Email*
                         </p>
                         <div className="mt-2">
@@ -157,6 +177,13 @@ export const Register = ({ open, onClose }: Props) => {
                                                     formState.submitCount > 0)
                                                     ? 'border-red-500'
                                                     : 'border-[#D1D1D1]'
+                                            } ${
+                                                error &&
+                                                (isTouched ||
+                                                    stepTriedNext.email ||
+                                                    formState.submitCount > 0)
+                                                    ? 'text-red-500'
+                                                    : 'text-[#141414]'
                                             }`}
                                         />
                                         {error?.message &&
@@ -181,7 +208,16 @@ export const Register = ({ open, onClose }: Props) => {
                 <>
                     <div className="mt-6 flex flex-col gap-4">
                         <div>
-                            <p className="font-inter text-[14px] leading-3.5 font-medium text-black">
+                            <p
+                                className={`font-inter text-[14px] leading-3.5 font-medium ${
+                                    formState.errors.password &&
+                                    ((formState.touchedFields.password ?? false) ||
+                                        stepTriedNext.password ||
+                                        formState.submitCount > 0)
+                                        ? 'text-red-500'
+                                        : 'text-black'
+                                }`}
+                            >
                                 Password*
                             </p>
                             <div className="relative mt-2">
@@ -203,7 +239,7 @@ export const Register = ({ open, onClose }: Props) => {
                                                             ? 'text'
                                                             : 'password'
                                                     }
-                                                    className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium text-[#141414] placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
+                                                className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
                                                         error &&
                                                         (isTouched ||
                                                             stepTriedNext.password ||
@@ -211,6 +247,14 @@ export const Register = ({ open, onClose }: Props) => {
                                                                 0)
                                                             ? 'border-red-500'
                                                             : 'border-[#D1D1D1]'
+                                                } ${
+                                                    error &&
+                                                    (isTouched ||
+                                                        stepTriedNext.password ||
+                                                        formState.submitCount >
+                                                            0)
+                                                        ? 'text-red-500'
+                                                        : 'text-[#141414]'
                                                     }`}
                                                 />
                                                 <button
@@ -232,6 +276,10 @@ export const Register = ({ open, onClose }: Props) => {
                                                         alt=""
                                                         aria-hidden="true"
                                                         className="h-5 w-5"
+                                                        style={{
+                                                            filter:
+                                                                iconErrorFilter,
+                                                        }}
                                                     />
                                                 </button>
                                             </div>
@@ -250,7 +298,17 @@ export const Register = ({ open, onClose }: Props) => {
                         </div>
 
                         <div>
-                            <p className="font-inter text-[14px] leading-3.5 font-medium text-black">
+                            <p
+                                className={`font-inter text-[14px] leading-3.5 font-medium ${
+                                    formState.errors.confirmPassword &&
+                                    ((formState.touchedFields.confirmPassword ??
+                                        false) ||
+                                        stepTriedNext.password ||
+                                        formState.submitCount > 0)
+                                        ? 'text-red-500'
+                                        : 'text-black'
+                                }`}
+                            >
                                 Confirm Password*
                             </p>
                             <div className="relative mt-2">
@@ -272,7 +330,7 @@ export const Register = ({ open, onClose }: Props) => {
                                                             ? 'text'
                                                             : 'password'
                                                     }
-                                                    className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium text-[#141414] placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
+                                                className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
                                                         error &&
                                                         (isTouched ||
                                                             stepTriedNext.password ||
@@ -280,6 +338,14 @@ export const Register = ({ open, onClose }: Props) => {
                                                                 0)
                                                             ? 'border-red-500'
                                                             : 'border-[#D1D1D1]'
+                                                } ${
+                                                    error &&
+                                                    (isTouched ||
+                                                        stepTriedNext.password ||
+                                                        formState.submitCount >
+                                                            0)
+                                                        ? 'text-red-500'
+                                                        : 'text-[#141414]'
                                                     }`}
                                                 />
                                                 <button
@@ -301,6 +367,10 @@ export const Register = ({ open, onClose }: Props) => {
                                                         alt=""
                                                         aria-hidden="true"
                                                         className="h-5 w-5"
+                                                        style={{
+                                                            filter:
+                                                                iconErrorFilter,
+                                                        }}
                                                     />
                                                 </button>
                                             </div>
@@ -325,7 +395,13 @@ export const Register = ({ open, onClose }: Props) => {
         return (
             <>
                 <div className="mt-6">
-                    <p className="font-inter text-[14px] leading-3.5 font-medium text-black">
+                    <p
+                        className={`font-inter text-[14px] leading-3.5 font-medium ${
+                            shouldShowUsernameError
+                                ? 'text-red-500'
+                                : 'text-black'
+                        }`}
+                    >
                         Username*
                     </p>
                     <div className="mt-2">
@@ -350,6 +426,10 @@ export const Register = ({ open, onClose }: Props) => {
                                                         shouldShowError
                                                             ? 'border-red-500'
                                                             : 'border-[#D1D1D1]'
+                                                    } ${
+                                                        shouldShowError
+                                                            ? 'text-red-500'
+                                                            : 'text-[#141414]'
                                                     }`}
                                                 />
                                                 {error?.message &&
@@ -489,7 +569,7 @@ export const Register = ({ open, onClose }: Props) => {
     if (!canRender) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-74">
             <div
                 className="absolute inset-0 bg-black/30"
                 onClick={onClose}
@@ -578,7 +658,8 @@ export const Register = ({ open, onClose }: Props) => {
                             type="button"
                             className="font-inter text-[14px] leading-3.5 font-medium text-[#141414] underline"
                             onClick={() => {
-                                // function to close sign up modal and open login modal
+                                onClose()
+                                onOpenLogin()
                             }}
                         >
                             Log In
