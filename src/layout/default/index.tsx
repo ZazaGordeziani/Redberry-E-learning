@@ -1,5 +1,6 @@
-import { Outlet } from 'react-router-dom'
-import { useState } from 'react'
+import { useAtomValue } from 'jotai'
+import { Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
 import Footer from '../../components/base/footer/footer'
 import Header from '../../components/base/header/header'
@@ -7,11 +8,28 @@ import { PageContainer } from '../../components/base/page-container/page-contain
 import Register from '../../pages/modals/register/register'
 import Login from '../../pages/modals/login/login'
 import Profile from '../../pages/modals/profile/profile'
+import { userAtom } from '@/store/auth'
 
 const DefaultLayout = () => {
+    const location = useLocation()
+    const user = useAtomValue(userAtom)
+    const isLoggedIn = !!user?.token
     const [isRegisterOpen, setIsRegisterOpen] = useState(false)
     const [isLoginOpen, setIsLoginOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+    }, [location.pathname, location.key])
+
+    const handleFooterMyProfileClick = () => {
+        if (isLoggedIn) {
+            window.scrollTo({ top: 0, behavior: 'auto' })
+            setIsProfileOpen(true)
+        } else {
+            setIsLoginOpen(true)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-white">
@@ -22,9 +40,13 @@ const DefaultLayout = () => {
                     onProfileClick={() => setIsProfileOpen(true)}
                 />
                 <PageContainer>
-                    <Outlet />
+                    <Outlet
+                        context={{
+                            openLoginModal: () => setIsLoginOpen(true),
+                        }}
+                    />
                 </PageContainer>
-                <Footer />
+                <Footer onMyProfileClick={handleFooterMyProfileClick} />
             </section>
 
             <Login

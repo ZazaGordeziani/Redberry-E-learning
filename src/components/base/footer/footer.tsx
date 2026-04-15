@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 import logo from '@/assets/logo.svg'
 
 import facebook from '@/assets/facebook-sign.svg'
@@ -10,17 +12,33 @@ import contactSign from '@/assets/contact-sign.svg'
 import emailSign from '@/assets/e-mail-sign.svg'
 import locationSign from '@/assets/location-sign.svg'
 
-export default function Footer() {
+const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+}
+
+type FooterProps = {
+    onMyProfileClick?: () => void
+}
+
+export default function Footer({ onMyProfileClick }: Readonly<FooterProps>) {
     return (
         <footer className="mx-auto flex h-83.5 w-full max-w-480 flex-col justify-center gap-18.5 border-t border-[#D1D1D1] bg-[#F5F5F5] pt-20 pb-5">
             <div className="mx-auto flex w-full max-w-391.5 justify-between">
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
-                        <img
-                            src={logo}
-                            alt="Redberry"
-                            className="h-11 w-11 cursor-pointer"
-                        />
+                        <Link
+                            to="/"
+                            className="inline-flex shrink-0 cursor-pointer"
+                            aria-label="Redberry home"
+                            onClick={scrollToTop}
+                        >
+                            <img
+                                src={logo}
+                                alt=""
+                                className="h-11 w-11"
+                                aria-hidden
+                            />
+                        </Link>
                         <span className="font-inter text-[24px] leading-6 font-medium text-[#130E67]">
                             Bootcamp
                         </span>
@@ -81,7 +99,13 @@ export default function Footer() {
                         </h3>
                         <div className="font-inter mt-5 flex flex-col gap-2 text-[18px] leading-4.5 font-normal text-[#666666]">
                             <p>Enrolled Courses</p>
-                            <p>Browse Courses</p>
+                            <Link
+                                to="/courses"
+                                className="text-inherit transition-colors hover:text-[#4F46E5]"
+                                onClick={scrollToTop}
+                            >
+                                Browse Courses
+                            </Link>
                         </div>
                     </div>
 
@@ -90,9 +114,13 @@ export default function Footer() {
                             Account
                         </h3>
                         <div className="mt-5 flex flex-col gap-2">
-                            <p className="font-inter text-[18px] leading-4.5 font-normal text-[#666666]">
+                            <button
+                                type="button"
+                                onClick={() => onMyProfileClick?.()}
+                                className="font-inter w-fit cursor-pointer text-left text-[18px] leading-4.5 font-normal text-[#666666] transition-colors hover:text-[#4F46E5]"
+                            >
                                 My Profile
-                            </p>
+                            </button>
                         </div>
                     </div>
 

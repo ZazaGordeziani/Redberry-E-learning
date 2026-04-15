@@ -255,23 +255,13 @@ export const Profile = ({ open, onClose }: Props) => {
                 </div>
 
                 <div className="mt-6 flex items-center gap-4">
-                    <div className="relative h-15 w-15">
+                    <div className="relative h-15 w-15 shrink-0">
                         {user?.avatar ? (
-                            <>
-                                <img
-                                    src={user.avatar}
-                                    alt="Avatar"
-                                    className="h-15 w-15 rounded-full object-cover"
-                                />
-                                {user?.profileComplete ? (
-                                    <img
-                                        src={greenDotIcon}
-                                        alt=""
-                                        aria-hidden="true"
-                                        className="absolute right-0 bottom-0 h-4.5 w-4.5"
-                                    />
-                                ) : null}
-                            </>
+                            <img
+                                src={user.avatar}
+                                alt="Avatar"
+                                className="h-15 w-15 rounded-full object-cover"
+                            />
                         ) : (
                             <img
                                 src={profileIcon}
@@ -280,6 +270,19 @@ export const Profile = ({ open, onClose }: Props) => {
                                 className="h-15 w-15"
                             />
                         )}
+                        {user?.profileComplete ? (
+                            <img
+                                src={greenDotIcon}
+                                alt=""
+                                aria-hidden="true"
+                                className="absolute right-0 bottom-0 h-4.5 w-4.5"
+                            />
+                        ) : user?.avatar ? (
+                            <span
+                                className="absolute right-0 bottom-0 h-4.5 w-4.5 rounded-full border-2 border-white"
+                                style={{ backgroundColor: '#F4A316' }}
+                            />
+                        ) : null}
                     </div>
 
                     <div>

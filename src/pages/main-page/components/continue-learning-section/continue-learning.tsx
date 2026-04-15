@@ -2,7 +2,13 @@ import lockIcon from '@/assets/lock.svg'
 
 import previewImage from '@/pages/main-page/components/continue-learning-section/assets/continue-learning.png'
 
-export const ContinueLearningSection = () => {
+type ContinueLearningSectionProps = {
+    onLoginClick: () => void
+}
+
+export const ContinueLearningSection = ({
+    onLoginClick,
+}: ContinueLearningSectionProps) => {
     return (
         <section className="pt-2 pb-43">
             <div className="mx-auto w-full max-w-391.5">
@@ -42,6 +48,7 @@ export const ContinueLearningSection = () => {
 
                             <button
                                 type="button"
+                                onClick={onLoginClick}
                                 className="font-inter mt-6 rounded-lg bg-[#4F46E5] px-6 py-3 text-[16px] leading-6 font-normal text-[#F5F5F5]"
                             >
                                 Log In

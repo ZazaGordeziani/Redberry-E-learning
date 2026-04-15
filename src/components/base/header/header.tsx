@@ -101,9 +101,7 @@ export default function Header({
                                             aria-hidden="true"
                                             className="absolute right-0 bottom-0 h-4.5 w-4.5"
                                         />
-                                    ) : null}
-
-                                    {!user?.profileComplete && user?.avatar ? (
+                                    ) : user?.avatar ? (
                                         <span
                                             className="absolute right-0 bottom-0 h-4.5 w-4.5 rounded-full border-2 border-white"
                                             style={{ backgroundColor: '#F4A316' }}

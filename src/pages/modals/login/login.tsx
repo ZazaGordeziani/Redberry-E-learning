@@ -69,6 +69,7 @@ export const Login = ({ open, onClose, onOpenRegister }: Props) => {
             })
             console.log('user logged in successfully')
             console.log(data?.user?.email, data?.user?.username)
+            window.scrollTo({ top: 0, behavior: 'auto' })
             onClose()
         } catch (e) {
             const err = e as AxiosError
