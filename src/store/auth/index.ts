@@ -1,4 +1,5 @@
-import { atom } from 'jotai'
+import type { PrimitiveAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 
 export type User = {
     username?: string
@@ -7,4 +8,4 @@ export type User = {
     token?: string
 } | null
 
-export const userAtom = atom<User>(null)
+export const userAtom: PrimitiveAtom<User> = atomWithStorage<User>('user', null)

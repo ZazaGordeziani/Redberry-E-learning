@@ -10,7 +10,11 @@ const Star = () => (
     <img src={ratingFullStar} alt="" aria-hidden="true" className="h-4 w-4" />
 )
 
-export const StartLearning = () => {
+type Props = {
+    extraBottomPadding?: boolean
+}
+
+export const StartLearning = ({ extraBottomPadding }: Readonly<Props>) => {
     const [courses, setCourses] = useState<FeaturedCourse[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
@@ -37,7 +41,7 @@ export const StartLearning = () => {
     }, [])
 
     return (
-        <section className="pt-5 pb-30">
+        <section className={`pt-5 ${extraBottomPadding ? 'pb-45' : 'pb-30'}`}>
             <div className="mx-auto w-full max-w-391.5">
                 <div className="flex flex-col gap-1.5">
                     <h2 className="font-inter pb-2 text-[40px] leading-10 font-semibold text-[#0A0A0A]">
