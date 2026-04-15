@@ -7,6 +7,7 @@ import { BounceLoader } from 'react-spinners'
 
 const LazyDefaultLayout = lazy(() => import('@/layout/default'))
 const LazyMainPageView = lazy(() => import('@/pages/main-page/views'))
+const LazyCoursesView = lazy(() => import('@/pages/courses/views'))
 
 function App() {
     return (
@@ -21,6 +22,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<LazyDefaultLayout />}>
                         <Route index element={<LazyMainPageView />} />
+                        <Route path="courses" element={<LazyCoursesView />} />
                     </Route>
 
                     <Route path="*" element={<NotFoundPage />} />

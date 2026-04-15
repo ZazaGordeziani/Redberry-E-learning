@@ -1,11 +1,12 @@
 import logo from '@/assets/logo.svg'
 import browseCoursesIcon from '@/assets/browse-course-sign.svg'
+import browseCoursesActiveIcon from '@/assets/browse-course-sign-active.svg'
 import enrolledCoursesIcon from '@/assets/enrolled-courses-sign.svg'
 import profileIcon from '@/assets/profile-sign.svg'
 import greenDotIcon from '@/assets/green-dot.svg'
 import { useAtomValue } from 'jotai'
 import { userAtom } from '@/store/auth'
-// import { Link } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 type Props = {
     onLoginClick?: () => void
@@ -20,25 +21,36 @@ export default function Header({
 }: Readonly<Props>) {
     const user = useAtomValue(userAtom)
     const isLoggedIn = !!user?.token
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    const isBrowseActive = location.pathname.startsWith('/courses')
 
     return (
         <header className="mx-auto flex h-27 w-full max-w-480 items-center justify-center border-b border-[#D1D1D1] bg-[#f5f5f5]">
             <div className="flex h-15 w-full max-w-391.5 items-center justify-between">
-                {/* <Link to="/"> */}
-                <img
-                    src={logo}
-                    alt="Redberry E-learning"
-                    className="h-15 w-auto cursor-pointer"
-                />
-                {/* </Link> */}
+                <button
+                    type="button"
+                    onClick={() => navigate('/')}
+                    aria-label="Go to home"
+                    className="cursor-pointer"
+                >
+                    <img
+                        src={logo}
+                        alt="Redberry E-learning"
+                        className="h-15 w-auto"
+                    />
+                </button>
 
                 <div className="flex items-center gap-9">
                     <button
                         type="button"
-                        className="font-inter flex items-center gap-2 text-xl leading-6 font-normal text-[#525252]"
+                        className="font-inter flex items-center gap-2 text-xl leading-6 font-normal"
+                        style={{ color: isBrowseActive ? '#4F46E5' : '#525252' }}
+                        onClick={() => navigate('/courses')}
                     >
                         <img
-                            src={browseCoursesIcon}
+                            src={isBrowseActive ? browseCoursesActiveIcon : browseCoursesIcon}
                             alt=""
                             aria-hidden="true"
                             className="h-5 w-5"

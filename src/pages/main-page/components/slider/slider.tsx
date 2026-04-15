@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import leftArrow from '@/pages/main-page/components/slider/assets/left-arrow.svg'
 import rightArrow from '@/pages/main-page/components/slider/assets/right-arrow.svg'
@@ -7,6 +8,7 @@ import slider2 from '@/pages/main-page/components/slider/assets/slider-2.svg'
 import slider3 from '@/pages/main-page/components/slider/assets/slider-3.svg'
 
 export const MainPageSlider = () => {
+    const navigate = useNavigate()
     const slides = useMemo(
         () => [
             {
@@ -81,6 +83,9 @@ export const MainPageSlider = () => {
                             <button
                                 type="button"
                                 className="font-inter h-16 w-51.5 rounded-lg bg-[#4F46E5] text-center text-[20px] leading-5 font-medium"
+                                onClick={() => {
+                                    if (activeSlide.id === 0) navigate('/courses')
+                                }}
                             >
                                 {activeSlide.buttonText}
                             </button>
