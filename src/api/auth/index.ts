@@ -5,7 +5,7 @@ import type { RegisterFormValues } from '@/pages/modals/register/index.typs'
 
 export const login = async ({ payload }: LoginPayload) => {
     const response = await httpClient.post(AUTH_ENDPONTS.LOGIN, payload)
-    return response.data
+    return response.data?.data
 }
 
 export const register = async (form: RegisterFormValues) => {
@@ -20,6 +20,6 @@ export const register = async (form: RegisterFormValues) => {
         headers: { 'Content-Type': 'multipart/form-data' },
     })
 
-    return response.data
+    return response.data?.data
 }
 
