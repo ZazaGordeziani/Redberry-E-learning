@@ -461,11 +461,28 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                 avatarRef.current?.click()
                             }
 
+                            const allowedAvatarTypes = [
+                                'image/jpeg',
+                                'image/png',
+                                'image/webp',
+                            ]
+
                             const handleFile = (file: File) => {
-                                if (file.size > 1 * 1024 * 1024) {
+                                if (!allowedAvatarTypes.includes(file.type)) {
                                     setError('avatar', {
                                         type: 'manual',
-                                        message: 'File size must be less than 1MB',
+                                        message:
+                                            'Avatar should be JPG, PNG or Webp format',
+                                    })
+                                    if (avatarRef.current)
+                                        avatarRef.current.value = ''
+                                    return
+                                }
+                                if (file.size > 2 * 1024 * 1024) {
+                                    setError('avatar', {
+                                        type: 'manual',
+                                        message:
+                                            'File size must be less than 2MB',
                                     })
                                     if (avatarRef.current)
                                         avatarRef.current.value = ''

@@ -61,14 +61,14 @@ const MobileSchema = z.object({
         }),
     avatar: z
         .instanceof(File)
-        .refine((file) => file.size <= 1 * 1024 * 1024, {
-            message: 'File size must be less than 1MB',
+        .refine((file) => file.size <= 2 * 1024 * 1024, {
+            message: 'File size must be less than 2MB',
         })
         .refine(
             (file) =>
                 ['image/jpeg', 'image/png', 'image/webp'].includes(file.type),
             {
-                message: 'Invalid photo, choose JPG, PNG or Webp',
+                message: 'Avatar should be JPG, PNG or Webp format',
             },
         )
         .nullable()
@@ -96,7 +96,7 @@ export const Profile = ({ open, onClose }: Props) => {
         [user],
     )
 
-    const { control, clearErrors, watch, reset, handleSubmit, formState } =
+    const { control, clearErrors, setError, watch, reset, handleSubmit, formState } =
         useForm<z.infer<typeof MobileSchema>>({
             resolver: zodResolver(MobileSchema),
             defaultValues,
@@ -177,12 +177,30 @@ export const Profile = ({ open, onClose }: Props) => {
     const isMobileValid = /^5\d{8}$/.test(mobileValue)
     const handleClickUpload = () => avatarRef.current?.click()
 
+    const allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/webp']
+
     const handleFile = (
         file: File | null,
         onChange: (v: File | null) => void,
     ) => {
         if (!file) {
             onChange(null)
+            if (avatarRef.current) avatarRef.current.value = ''
+            return
+        }
+        if (!allowedAvatarTypes.includes(file.type)) {
+            setError('avatar', {
+                type: 'manual',
+                message: 'Avatar should be JPG, PNG or Webp format',
+            })
+            if (avatarRef.current) avatarRef.current.value = ''
+            return
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            setError('avatar', {
+                type: 'manual',
+                message: 'File size must be less than 2MB',
+            })
             if (avatarRef.current) avatarRef.current.value = ''
             return
         }
