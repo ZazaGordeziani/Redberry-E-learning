@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import ratingFullStar from '@/assets/rating-full-star.svg'
-import dropdownArrowIcon from '@/assets/dropdown-arrow.svg'
+import dropdownArrowIcon from '@/pages/courses/components/assets/dropdow-arrow-sorting.svg'
 
 import { CategoryFilterGlyph } from '@/pages/courses/components/categoryFilterGlyph'
 
@@ -490,7 +490,7 @@ const CoursesPage = () => {
                                 onClick={() => setSortOpen((o) => !o)}
                                 className="flex h-12.25 w-58.5 items-center rounded-xl border border-[#D1D1D1] bg-white px-3 text-left"
                             >
-                                <span className="font-inter shrink-0 text-[16px] leading-6 font-medium tracking-normal text-[#666666]">
+                                <span className="font-inter shrink-0 pl-2 text-[16px] leading-6 font-medium tracking-normal text-[#666666]">
                                     Sort By:
                                 </span>
                                 <span className="font-inter ml-2 min-w-0 flex-1 truncate text-[16px] leading-6 font-medium tracking-normal text-[#4F46E5]">
@@ -504,7 +504,7 @@ const CoursesPage = () => {
                                     src={dropdownArrowIcon}
                                     alt=""
                                     aria-hidden="true"
-                                    className={`ml-1 h-4 w-4 shrink-0 transition-transform ${sortOpen ? 'rotate-180' : ''}`}
+                                    className={`mr-2 ml-1 shrink-0 transition-transform ${sortOpen ? 'rotate-180' : ''}`}
                                 />
                             </button>
 
