@@ -75,7 +75,7 @@ export const MainPageSlider = () => {
                             ) : null}
 
                             {activeSlide.id === 2 ? (
-                                <div className="h-12.5" />
+                                <div className="h-18" />
                             ) : null}
 
                             <button
