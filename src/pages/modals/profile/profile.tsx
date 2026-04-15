@@ -8,6 +8,7 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import closeIcon from '@/assets/close-moda-sign.svg'
 import pencilIcon from '@/assets/pencil.svg'
 import checkMarkIcon from '@/assets/check-mark.svg'
+import dropdownArrowIcon from '@/assets/dropdown-arrow.svg'
 import uploadAvatarIcon from '@/assets/upload-avatar.svg'
 import profileIcon from '@/assets/profile-sign.svg'
 import greenDotIcon from '@/assets/green-dot.svg'
@@ -189,6 +190,17 @@ export const Profile = ({ open, onClose }: Props) => {
         onChange(file)
     }
 
+    const requestClose = () => {
+        if (user?.profileComplete) {
+            onClose()
+            return
+        }
+        const ok = globalThis.confirm(
+            "Your profile is incomplete. You won't be able to enroll in courses until you complete it. Close anyway?",
+        )
+        if (ok) onClose()
+    }
+
     if (!open) return null
 
     return (
@@ -196,7 +208,7 @@ export const Profile = ({ open, onClose }: Props) => {
             <button
                 type="button"
                 className="absolute inset-0 bg-black/30"
-                onClick={onClose}
+                onClick={requestClose}
                 aria-label="Close modal backdrop"
             />
 
@@ -206,7 +218,7 @@ export const Profile = ({ open, onClose }: Props) => {
             >
                 <button
                     type="button"
-                    onClick={onClose}
+                    onClick={requestClose}
                     className="absolute top-5 right-5"
                     aria-label="Close modal"
                 >
@@ -443,9 +455,15 @@ export const Profile = ({ open, onClose }: Props) => {
                                                 }
                                             }}
                                             onBlur={onBlur}
-                                            className="font-inter h-11.75 w-21.25 rounded-lg border-[1.5px] border-[#D1D1D1] bg-white px-4 text-[14px] leading-3.5 font-medium text-[#ADADAD] outline-none"
+                                            className="font-inter h-11.75 w-21.25 rounded-lg border-[1.5px] border-[#D1D1D1] bg-white px-4 pr-12 text-[14px] leading-3.5 font-medium text-[#ADADAD] outline-none"
                                         />
                                     )}
+                                />
+                                <img
+                                    src={dropdownArrowIcon}
+                                    alt=""
+                                    aria-hidden="true"
+                                    className="absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2"
                                 />
                             </div>
                             {formState.errors.age?.message ? (
