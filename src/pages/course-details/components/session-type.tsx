@@ -58,7 +58,6 @@ function sessionKindIcon(kind: ReturnType<typeof normalizeSessionKind>) {
     return hybridSvgRaw
 }
 
-/** Session kind icon for a raw API session name (e.g. enrollment schedule). */
 export function SessionTypeKindIcon({
     name,
     className = 'h-6 w-6 shrink-0 text-[#525252]',
