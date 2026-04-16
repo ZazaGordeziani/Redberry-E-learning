@@ -59,6 +59,16 @@ export type CourseTimeSlot = {
     endTime: string
 }
 
+/** Time slot options from `GET /courses/:id/time-slots` */
+export type CourseTimeSlotOption = {
+    id: number
+    label: string
+    startTime: string
+    endTime: string
+    /** When false, card is shown but not selectable (same as unavailable weekly card). */
+    available?: boolean
+}
+
 export type CourseEnrollmentSchedule = {
     weeklySchedule?: {
         id: number
@@ -84,6 +94,14 @@ export type CourseEnrollmentDetail = {
     progress: number
     completedAt: string | null
     schedule?: CourseEnrollmentSchedule
+}
+
+export type WeeklySchedule = {
+    id: number
+    label: string
+    days: string[]
+    /** When false, card uses disabled (grey) styling. Defaults to true if omitted. */
+    available?: boolean
 }
 
 export type CourseDetail = {

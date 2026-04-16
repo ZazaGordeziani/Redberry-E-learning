@@ -1,11 +1,1 @@
-import CourseDescription from '@/pages/course-details/components/course-description'
-
-const courseDetailsPage = () => {
-    return (
-        <div>
-            <CourseDescription />
-        </div>
-    )
-}
-
-export default courseDetailsPage
+export { default } from '@/pages/course-details/components/course-description'

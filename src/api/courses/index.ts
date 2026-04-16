@@ -4,9 +4,11 @@ import type {
     Category,
     Course,
     CourseDetail,
+    CourseTimeSlotOption,
     Instructor,
     ListResponse,
     Topic,
+    WeeklySchedule,
 } from './index.types'
 
 export async function getCategories() {
@@ -36,6 +38,28 @@ export async function getCourses(params?: { page?: number; perPage?: number }) {
 
 export async function getCourseById(id: number) {
     const res = await httpClient.get<{ data: CourseDetail }>(`/courses/${id}`)
+    return res.data.data
+}
+
+export async function getCourseWeeklySchedules(courseId: number) {
+    const res = await httpClient.get<ListResponse<WeeklySchedule>>(
+        `/courses/${courseId}/weekly-schedules`,
+    )
+    return res.data.data
+}
+
+export async function getCourseTimeSlots(
+    courseId: number,
+    weeklyScheduleId: number,
+) {
+    const res = await httpClient.get<ListResponse<CourseTimeSlotOption>>(
+        `/courses/${courseId}/time-slots`,
+        {
+            params: {
+                weekly_schedule_id: weeklyScheduleId,
+            },
+        },
+    )
     return res.data.data
 }
 
