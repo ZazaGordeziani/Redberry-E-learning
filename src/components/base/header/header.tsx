@@ -24,7 +24,7 @@ export default function Header({
     const navigate = useNavigate()
     const location = useLocation()
 
-    const isBrowseActive = location.pathname.startsWith('/courses')
+    const isBrowseActive = location.pathname === '/courses'
 
     return (
         <header className="mx-auto flex h-27 w-full max-w-480 items-center justify-center border-b border-[#D1D1D1] bg-[#f5f5f5]">

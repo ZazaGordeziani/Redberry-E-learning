@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import {
     getFeaturedCourses,
@@ -104,12 +105,12 @@ export const StartLearning = ({ extraBottomPadding }: Readonly<Props>) => {
                                           </p>
                                       </div>
 
-                                      <button
-                                          type="button"
-                                          className="font-inter h-14.5 w-29 rounded-lg bg-[#4F46E5] text-center text-[20px] leading-5 font-normal text-white"
+                                      <Link
+                                          to={`/courses/${course.id}`}
+                                          className="font-inter inline-flex h-14.5 w-29 items-center justify-center rounded-lg bg-[#4F46E5] text-center text-[20px] leading-5 font-normal text-white"
                                       >
                                           Details
-                                      </button>
+                                      </Link>
                                   </div>
                               </div>
                           ))}

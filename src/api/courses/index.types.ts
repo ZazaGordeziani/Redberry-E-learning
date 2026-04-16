@@ -47,3 +47,63 @@ export type ListResponse<T> = {
     }
 }
 
+export type CourseReview = {
+    userId: number
+    rating: number
+}
+
+export type CourseTimeSlot = {
+    id: number
+    label: string
+    startTime: string
+    endTime: string
+}
+
+export type CourseEnrollmentSchedule = {
+    weeklySchedule?: {
+        id: number
+        label: string
+        days: string[]
+    }
+    timeSlot?: CourseTimeSlot
+    sessionType?: {
+        id: number
+        courseScheduleId: number
+        name: string
+        priceModifier: number
+        availableSeats: number
+        location: string
+    }
+    location?: string
+}
+
+export type CourseEnrollmentDetail = {
+    id: number
+    quantity: number
+    totalPrice: number
+    progress: number
+    completedAt: string | null
+    schedule?: CourseEnrollmentSchedule
+}
+
+export type CourseDetail = {
+    id: number
+    title: string
+    description: string
+    image: string
+    basePrice: string | number
+    durationWeeks: number
+    hours?: number
+    isFeatured: boolean
+    reviews: CourseReview[]
+    isRated: boolean
+    category: Category
+    topic: {
+        id: number
+        name: string
+        categoryId?: number
+    }
+    instructor: Instructor
+    enrollment?: CourseEnrollmentDetail | null
+}
+
