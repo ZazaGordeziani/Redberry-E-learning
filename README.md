@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# RedSeam Clothing
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Overview
 
-Currently, two official plugins are available:
+Redberry E-learing is an online platform which suggests consumers to choose the course they like and also choose the preferable day, time and session type.
+Session type incldes three variants
+-hybrid
+-in person
+-online
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Sort courses by five categories: newest first, price low to high, price high to low, Most popular, title: A-Z.
+- Users chooses course adds up time date and session type, then takes the course.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- User registration and login.
+- Successful registration automatically logs the user in.
+- Avatar upload during registration; if none is provided, then avatar svg is displayed.
+- Filter and sort courses based on user preference.
+- Pagination on the products page.
+- Modal for successful successfull registration, enrollment conflict, course completion.
+- Loading states before displaying page content.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Frontend: React, TypeScript, TailwindCSS
+- State Management: Jotai, React Hook Form
+- Validation: Zod, React Hook Form
+- Routing: React Router DOM
+- API Calls: Axios (`httpClient`)
+- qs for displaying the filter results in url
+- Optimized for 1920x1080 screen resolution
+- husky installed so the following orders run after commit, to avoid chaotic code
+    - yarn ts-check
+    - yarn lint
+    - yarn prettier
 
-```js
-export default defineConfig([
-    globalIgnores(['dist']),
-    {
-        files: ['**/*.{ts,tsx}'],
-        extends: [
-            // Other configs...
+## How to Use
 
-            // Remove tseslint.configs.recommended and replace with this
-            tseslint.configs.recommendedTypeChecked,
-            // Alternatively, use this for stricter rules
-            tseslint.configs.strictTypeChecked,
-            // Optionally, add this for stylistic rules
-            tseslint.configs.stylisticTypeChecked,
+1. Clone the repository:
 
-            // Other configs...
-        ],
-        languageOptions: {
-            parserOptions: {
-                project: ['./tsconfig.node.json', './tsconfig.app.json'],
-                tsconfigRootDir: import.meta.dirname,
-            },
-            // other options...
-        },
-    },
-])
-```
+    git clone https://github.com/ZazaGordeziani/Redberry-E-learning.git
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+    install npm by just typing npm i or npm install in terminal and hit enter
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+    create .env file and set VITE_API_BASE_URL based on the following endpoint
+    https://api.redclass.redberryinternship.ge/api
+    npm run dev - to start the project
 
-export default defineConfig([
-    globalIgnores(['dist']),
-    {
-        files: ['**/*.{ts,tsx}'],
-        extends: [
-            // Other configs...
-            // Enable lint rules for React
-            reactX.configs['recommended-typescript'],
-            // Enable lint rules for React DOM
-            reactDom.configs.recommended,
-        ],
-        languageOptions: {
-            parserOptions: {
-                project: ['./tsconfig.node.json', './tsconfig.app.json'],
-                tsconfigRootDir: import.meta.dirname,
-            },
-            // other options...
-        },
-    },
-])
-```
+Vercel link to see the completed project - https://redberry-e-learning.vercel.app/
