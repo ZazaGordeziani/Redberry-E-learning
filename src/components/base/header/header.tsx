@@ -2,6 +2,7 @@ import logo from '@/assets/logo.svg'
 import browseCoursesIcon from '@/assets/browse-course-sign.svg'
 import browseCoursesActiveIcon from '@/assets/browse-course-sign-active.svg'
 import enrolledCoursesIcon from '@/assets/enrolled-courses-sign.svg'
+import enrolledCoursesActiveIcon from '@/assets/enrolled-courses-sign-active.svg'
 import profileIcon from '@/assets/profile-sign.svg'
 import greenDotIcon from '@/assets/green-dot.svg'
 import { useAtomValue } from 'jotai'
@@ -12,12 +13,18 @@ type Props = {
     onLoginClick?: () => void
     onSignUpClick?: () => void
     onProfileClick?: () => void
+    /** When set (e.g. logged in), “Enrolled Courses” opens the sidebar. */
+    onEnrolledCoursesClick?: () => void
+    /** When the enrolled-courses sidebar is open (`?enrolled=1`). */
+    isEnrolledCoursesActive?: boolean
 }
 
 export default function Header({
     onLoginClick,
     onSignUpClick,
     onProfileClick,
+    onEnrolledCoursesClick,
+    isEnrolledCoursesActive = false,
 }: Readonly<Props>) {
     const user = useAtomValue(userAtom)
     const isLoggedIn = !!user?.token
@@ -68,10 +75,20 @@ export default function Header({
                         <div className="flex items-center gap-9">
                             <button
                                 type="button"
-                                className="font-inter flex items-center gap-2 text-xl leading-6 font-normal text-[#525252]"
+                                className="font-inter flex cursor-pointer items-center gap-2 text-xl leading-6 font-normal"
+                                style={{
+                                    color: isEnrolledCoursesActive
+                                        ? '#4F46E5'
+                                        : '#525252',
+                                }}
+                                onClick={onEnrolledCoursesClick}
                             >
                                 <img
-                                    src={enrolledCoursesIcon}
+                                    src={
+                                        isEnrolledCoursesActive
+                                            ? enrolledCoursesActiveIcon
+                                            : enrolledCoursesIcon
+                                    }
                                     alt=""
                                     aria-hidden="true"
                                     className="h-5 w-5"

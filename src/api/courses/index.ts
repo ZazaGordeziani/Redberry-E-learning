@@ -84,8 +84,7 @@ export async function submitCourseReview(
     } catch (e) {
         if (!axios.isAxiosError(e) || e.response?.status !== 422) throw e
         const raw = e.response?.data as { message?: unknown } | undefined
-        const msg =
-            typeof raw?.message === 'string' ? raw.message : ''
+        const msg = typeof raw?.message === 'string' ? raw.message : ''
         if (!/already\s+rated/i.test(msg)) throw e
         await httpClient.put(`/courses/${courseId}/reviews`, payload)
     }

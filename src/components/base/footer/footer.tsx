@@ -18,9 +18,13 @@ const scrollToTop = () => {
 
 type FooterProps = {
     onMyProfileClick?: () => void
+    onEnrolledCoursesClick?: () => void
 }
 
-export default function Footer({ onMyProfileClick }: Readonly<FooterProps>) {
+export default function Footer({
+    onMyProfileClick,
+    onEnrolledCoursesClick,
+}: Readonly<FooterProps>) {
     return (
         <footer className="mx-auto flex h-83.5 w-full max-w-480 flex-col justify-center gap-18.5 border-t border-[#D1D1D1] bg-[#F5F5F5] pt-20 pb-5">
             <div className="mx-auto flex w-full max-w-391.5 justify-between">
@@ -98,7 +102,13 @@ export default function Footer({ onMyProfileClick }: Readonly<FooterProps>) {
                             Explore
                         </h3>
                         <div className="font-inter mt-5 flex flex-col gap-2 text-[18px] leading-4.5 font-normal text-[#666666]">
-                            <p>Enrolled Courses</p>
+                            <button
+                                type="button"
+                                onClick={() => onEnrolledCoursesClick?.()}
+                                className="w-fit cursor-pointer text-left text-inherit transition-colors hover:text-[#4F46E5]"
+                            >
+                                Enrolled Courses
+                            </button>
                             <Link
                                 to="/courses"
                                 className="text-inherit transition-colors hover:text-[#4F46E5]"

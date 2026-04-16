@@ -8,9 +8,11 @@ import { PageContainer } from '../../components/base/page-container/page-contain
 import Register from '../../pages/modals/register/register'
 import Login from '../../pages/modals/login/login'
 import Profile from '../../pages/modals/profile/profile'
+import { EnrolledCoursesSidebar } from '../../pages/modals/side-bar'
 import { userAtom } from '@/store/auth'
 
 const PROFILE_QUERY = 'profile'
+const ENROLLED_QUERY = 'enrolled'
 const AUTH_QUERY = 'auth'
 const AUTH_LOGIN = 'login'
 const AUTH_SIGNUP = 'signup'
@@ -26,6 +28,9 @@ const DefaultLayout = () => {
     const isRegisterOpen = authParam === AUTH_SIGNUP
 
     const isProfileOpen = searchParams.get(PROFILE_QUERY) === '1'
+
+    const isEnrolledSidebarOpen =
+        isLoggedIn && searchParams.get(ENROLLED_QUERY) === '1'
 
     const openProfile = useCallback(() => {
         setSearchParams(
@@ -82,6 +87,28 @@ const DefaultLayout = () => {
         )
     }, [setSearchParams])
 
+    const openEnrolledSidebar = useCallback(() => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev.toString())
+                next.set(ENROLLED_QUERY, '1')
+                return next
+            },
+            { replace: true },
+        )
+    }, [setSearchParams])
+
+    const closeEnrolledSidebar = useCallback(() => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev.toString())
+                next.delete(ENROLLED_QUERY)
+                return next
+            },
+            { replace: true },
+        )
+    }, [setSearchParams])
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'auto' })
     }, [location.pathname, location.key])
@@ -95,6 +122,15 @@ const DefaultLayout = () => {
         }
     }
 
+    const handleFooterEnrolledCoursesClick = () => {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+        if (isLoggedIn) {
+            openEnrolledSidebar()
+        } else {
+            openLogin()
+        }
+    }
+
     return (
         <div className="min-h-screen bg-white">
             <section className="mx-auto flex min-h-screen w-full max-w-480 flex-col overflow-x-hidden bg-[#F5F5F5]">
@@ -102,6 +138,10 @@ const DefaultLayout = () => {
                     onLoginClick={openLogin}
                     onSignUpClick={openRegister}
                     onProfileClick={openProfile}
+                    onEnrolledCoursesClick={
+                        isLoggedIn ? openEnrolledSidebar : undefined
+                    }
+                    isEnrolledCoursesActive={isEnrolledSidebarOpen}
                 />
                 <PageContainer>
                     <Outlet
@@ -110,7 +150,10 @@ const DefaultLayout = () => {
                         }}
                     />
                 </PageContainer>
-                <Footer onMyProfileClick={handleFooterMyProfileClick} />
+                <Footer
+                    onMyProfileClick={handleFooterMyProfileClick}
+                    onEnrolledCoursesClick={handleFooterEnrolledCoursesClick}
+                />
             </section>
 
             <Login
@@ -124,6 +167,10 @@ const DefaultLayout = () => {
                 onOpenLogin={openLogin}
             />
             <Profile open={isProfileOpen} onClose={closeProfile} />
+            <EnrolledCoursesSidebar
+                open={isEnrolledSidebarOpen}
+                onClose={closeEnrolledSidebar}
+            />
         </div>
     )
 }

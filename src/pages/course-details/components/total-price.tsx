@@ -94,11 +94,11 @@ export function TotalPrice({
                     onEnroll?.()
                 }}
                 className={`font-inter mt-8 mb-3 w-full rounded-xl py-4 text-center text-[20px] leading-6 font-semibold transition-colors ${
-                    enrollDisabled ?
-                        'cursor-not-allowed bg-[#EEEDFC] text-[#B7B3F4]'
-                    : needsProfileOnly ?
-                        'cursor-pointer bg-[#EEEDFC] text-[#B7B3F4]'
-                    :   'cursor-pointer bg-[#281ED2] text-white hover:bg-[#4F46E5]'
+                    enrollDisabled
+                        ? 'cursor-not-allowed bg-[#EEEDFC] text-[#B7B3F4]'
+                        : needsProfileOnly
+                          ? 'cursor-pointer bg-[#EEEDFC] text-[#B7B3F4]'
+                          : 'cursor-pointer bg-[#281ED2] text-white hover:bg-[#4F46E5]'
                 }`}
             >
                 {enrollPending ? 'Enrolling…' : 'Enroll Now'}
