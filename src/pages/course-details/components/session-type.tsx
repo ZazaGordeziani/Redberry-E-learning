@@ -133,7 +133,7 @@ function SeatsAvailability({ seats }: { seats: number }) {
             </p>
         )
     }
-    if (seats > 0 && seats <= 5) {
+    if (seats > 0 && seats < 5) {
         return (
             <div className="font-inter mt-2 flex items-center justify-center gap-1 text-[12px] leading-none font-medium text-[#F4A316]">
                 <SvgGlyph
