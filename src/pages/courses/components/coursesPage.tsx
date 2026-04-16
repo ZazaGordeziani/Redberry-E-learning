@@ -700,7 +700,7 @@ const CoursesPage = () => {
                             </div>
                         ) : filteredCourses.length === 0 ? (
                             <div className="flex min-h-[min(50vh,28rem)] w-full flex-col items-center justify-center px-4 py-16">
-                                <h2 className="font-inter text-center text-[28px] leading-tight font-semibold tracking-normal text-[#141414] sm:text-[32px]">
+                                <h2 className="font-inter text-center text-[28px] leading-tight font-semibold tracking-normal text-[#141414]">
                                     No Course to Display
                                 </h2>
                             </div>

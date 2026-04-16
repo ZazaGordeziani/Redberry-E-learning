@@ -63,11 +63,9 @@ export const StartLearning = ({ extraBottomPadding }: Readonly<Props>) => {
                               />
                           ))
                         : courses.map((course) => (
-                              <Link
+                              <div
                                   key={course.id}
-                                  to={`/courses/${course.id}`}
-                                  aria-label={`Open course: ${course.title}`}
-                                  className="flex h-144 w-126.5 flex-col rounded-xl border border-[#F5F5F5] bg-white p-5 pb-5 text-inherit no-underline transition-colors hover:border-[#E8E8E8] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+                                  className="flex h-144 w-126.5 flex-col rounded-xl border border-[#F5F5F5] bg-white p-5 pb-5"
                               >
                                   <img
                                       src={course.image}
@@ -88,16 +86,16 @@ export const StartLearning = ({ extraBottomPadding }: Readonly<Props>) => {
                                       </div>
                                   </div>
 
-                                  <div className="mt-4 min-h-0 flex-1">
+                                  <div className="mt-4">
                                       <h3 className="font-inter text-[24px] leading-6 font-semibold text-[#141414]">
                                           {course.title}
                                       </h3>
-                                      <p className="font-inter mt-2.5 line-clamp-3 text-[16px] leading-6 font-medium text-[#666666]">
+                                      <p className="font-inter mt-2.5 text-[16px] leading-6 font-medium text-[#666666]">
                                           {course.description}
                                       </p>
                                   </div>
 
-                                  <div className="mt-auto flex items-end justify-between pt-2">
+                                  <div className="mt-auto flex justify-between">
                                       <div className="flex flex-row items-center gap-2">
                                           <p className="font-inter text-[12px] leading-3 font-medium text-[#8A8A8A]">
                                               Starting from
@@ -106,8 +104,15 @@ export const StartLearning = ({ extraBottomPadding }: Readonly<Props>) => {
                                               ${course.basePrice}
                                           </p>
                                       </div>
+
+                                      <Link
+                                          to={`/courses/${course.id}`}
+                                          className="font-inter inline-flex h-14.5 w-29 items-center justify-center rounded-lg bg-[#4F46E5] text-center text-[20px] leading-5 font-normal text-white"
+                                      >
+                                          Details
+                                      </Link>
                                   </div>
-                              </Link>
+                              </div>
                           ))}
                 </div>
             </div>

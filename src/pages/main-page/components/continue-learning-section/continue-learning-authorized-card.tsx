@@ -98,21 +98,19 @@ function MetaRow({ icon, text }: { icon: string; text: string }) {
     )
 }
 
-export type EnrolledCourseCardProps = {
+export type ContinueLearningAuthorizedCardProps = {
     enrollment: CourseEnrollmentDetail
-    onNavigate?: () => void
 }
 
-export default function EnrolledCourseCard({
+export default function ContinueLearningAuthorizedCard({
     enrollment,
-    onNavigate,
-}: EnrolledCourseCardProps) {
+}: ContinueLearningAuthorizedCardProps) {
     const course = enrollment.course
     const schedule = enrollment.schedule
     const courseId = course?.id
     const title = course?.title?.trim() || 'Course'
     const imageUrl = course?.image?.trim()
-    const instructorName = course?.instructor?.name?.trim() ?? '—'
+    const lecturerName = course?.instructor?.name?.trim() ?? '—'
     const avgRating = course?.avgRating
     const ratingText =
         avgRating != null && Number.isFinite(Number(avgRating))
@@ -133,11 +131,11 @@ export default function EnrolledCourseCard({
 
     return (
         <article
-            className="mx-auto box-border flex min-h-73.75 w-full max-w-155.75 flex-col justify-between gap-4 rounded-xl border border-[#F0F0F0] bg-white p-5"
+            className="box-border flex h-54.75 w-126.5 flex-col justify-between gap-2 rounded-xl border border-[#F0F0F0] bg-white p-4"
             aria-label={title}
         >
-            <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-4">
-                <div className="relative h-47.75 w-67.25 shrink-0 overflow-hidden rounded-[10px] bg-[#F0F0F0]">
+            <div className="flex min-h-0 flex-row gap-3 overflow-hidden">
+                <div className="relative h-31.75 w-45 shrink-0 overflow-hidden rounded-xl bg-[#F0F0F0]">
                     {imageUrl ? (
                         <img
                             src={imageUrl}
@@ -147,14 +145,14 @@ export default function EnrolledCourseCard({
                     ) : null}
                 </div>
 
-                <div className="flex min-w-0 flex-1 flex-col">
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
                     <div className="flex flex-row items-start justify-between gap-2">
                         <p className="font-inter min-w-0 text-[14px] leading-5">
                             <span className="font-normal text-[#666666]">
-                                Instructor{' '}
+                                Lecturer{' '}
                             </span>
                             <span className="font-medium text-[#141414]">
-                                {instructorName}
+                                {lecturerName}
                             </span>
                         </p>
                         <div className="flex shrink-0 items-center gap-1">
@@ -170,14 +168,14 @@ export default function EnrolledCourseCard({
                         </div>
                     </div>
 
-                    <h3 className="font-inter mt-2 line-clamp-2 text-[20px] leading-6 font-semibold text-[#141414]">
+                    <h3 className="font-inter mt-1 line-clamp-2 text-[20px] leading-6 font-semibold text-[#141414]">
                         {title}
                     </h3>
 
-                    <div className="mt-3 flex min-h-0 flex-col gap-1">
+                    <div className="mt-1 flex min-h-0 flex-col overflow-hidden">
                         <MetaRow icon={calendar2Icon} text={weekLine} />
                         <MetaRow icon={clockIcon} text={timeLine} />
-                        <div className="flex items-start gap-2">
+                        <div className="flex min-w-0 items-start gap-2">
                             {sessionNameRaw.length > 0 ? (
                                 <SessionTypeKindIcon
                                     name={sessionNameRaw}
@@ -189,7 +187,7 @@ export default function EnrolledCourseCard({
                                     aria-hidden
                                 />
                             )}
-                            <span className="font-inter text-[14px] leading-6.5 font-normal text-[#666666]">
+                            <span className="font-inter min-w-0 truncate text-[14px] leading-6.5 font-normal text-[#666666]">
                                 {sessionNameRaw.length > 0 ? sessionLine : '—'}
                             </span>
                         </div>
@@ -198,13 +196,13 @@ export default function EnrolledCourseCard({
                 </div>
             </div>
 
-            <div className="flex shrink-0 flex-row items-center justify-between gap-4">
+            <div className="flex shrink-0 flex-row items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                     <p className="font-inter text-[16px] leading-6 font-medium text-[#141414]">
                         {progressPct}% Complete
                     </p>
                     <div
-                        className="mt-1 h-4 w-full max-w-110.5 overflow-hidden rounded-full bg-[#E8E7F9]"
+                        className="mt-1 h-4 w-full max-w-70 overflow-hidden rounded-full bg-[#E8E7F9]"
                         role="progressbar"
                         aria-valuenow={progressPct}
                         aria-valuemin={0}
@@ -220,7 +218,6 @@ export default function EnrolledCourseCard({
                 {courseId != null ? (
                     <Link
                         to={`/courses/${courseId}`}
-                        onClick={onNavigate}
                         className="font-inter inline-flex h-12 w-29.25 shrink-0 items-center justify-center rounded-lg border border-[#958FEF] bg-white text-center text-[16px] leading-6 font-medium text-[#4F46E5] hover:bg-[#F5F5FF]"
                     >
                         View

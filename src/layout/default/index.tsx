@@ -109,9 +109,10 @@ const DefaultLayout = () => {
         )
     }, [setSearchParams])
 
+    // Scroll to top only on real route changes, not query-string updates (e.g. course schedule picks).
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'auto' })
-    }, [location.pathname, location.key])
+    }, [location.pathname])
 
     const handleFooterMyProfileClick = () => {
         if (isLoggedIn) {
