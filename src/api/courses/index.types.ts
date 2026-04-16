@@ -59,13 +59,12 @@ export type CourseTimeSlot = {
     endTime: string
 }
 
-/** Time slot options from `GET /courses/:id/time-slots` */
 export type CourseTimeSlotOption = {
     id: number
     label: string
     startTime: string
     endTime: string
-    /** When false, card is shown but not selectable (same as unavailable weekly card). */
+
     available?: boolean
 }
 
@@ -96,7 +95,6 @@ export type CourseEnrollmentDetail = {
     schedule?: CourseEnrollmentSchedule
 }
 
-/** Session type options from `GET /courses/:id/session-types` */
 export type CourseSessionTypeOption = {
     id: number
     courseScheduleId: number
@@ -106,9 +104,6 @@ export type CourseSessionTypeOption = {
     location: string
 }
 
-/**
- * Maps Laravel / mixed JSON (camelCase or snake_case, optional venue keys) into our shape.
- */
 export function parseCourseSessionTypeOption(
     raw: Record<string, unknown>,
 ): CourseSessionTypeOption {
@@ -132,9 +127,7 @@ export function parseCourseSessionTypeOption(
 
     return {
         id: num(raw.id),
-        courseScheduleId: num(
-            raw.courseScheduleId ?? raw.course_schedule_id,
-        ),
+        courseScheduleId: num(raw.courseScheduleId ?? raw.course_schedule_id),
         name: str(raw.name),
         priceModifier: str(raw.priceModifier ?? raw.price_modifier ?? '0'),
         availableSeats: num(raw.availableSeats ?? raw.available_seats),
@@ -146,7 +139,7 @@ export type WeeklySchedule = {
     id: number
     label: string
     days: string[]
-    /** When false, card uses disabled (grey) styling. Defaults to true if omitted. */
+
     available?: boolean
 }
 
@@ -170,4 +163,3 @@ export type CourseDetail = {
     instructor: Instructor
     enrollment?: CourseEnrollmentDetail | null
 }
-

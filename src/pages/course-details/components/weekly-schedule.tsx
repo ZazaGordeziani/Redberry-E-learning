@@ -1,10 +1,23 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
-import { getCourseWeeklySchedules } from '@/api/courses'
+import {
+    getCourseSessionTypes,
+    getCourseTimeSlots,
+    getCourseWeeklySchedules,
+} from '@/api/courses'
 import { SessionTypesPicker } from '@/pages/course-details/components/session-type'
-import { TimeSlotsPicker } from '@/pages/course-details/components/time-slots'
+import {
+    mergeTimeSlotsWithPresets,
+    TimeSlotsPicker,
+} from '@/pages/course-details/components/time-slots'
 import type { WeeklySchedule as WeeklyScheduleApi } from '@/api/courses/index.types'
+import {
+    mergeScheduleIntoSearchString,
+    parseScheduleUrlSearch,
+    type ScheduleUrlSelection,
+} from '@/utils/scheduleSearchParams'
 
 const HEADING_CLASS =
     'font-inter text-[24px] leading-none font-semibold tracking-normal'
@@ -307,32 +320,27 @@ export default function WeeklySchedule({
     courseId,
     className = '',
 }: WeeklyScheduleProps) {
+    const [searchParams, setSearchParams] = useSearchParams()
+
     const [weeklyOpen, setWeeklyOpen] = useState(true)
     const [timeSlotOpen, setTimeSlotOpen] = useState(false)
     const [sessionTypeOpen, setSessionTypeOpen] = useState(false)
 
-    const [selectedWeeklyId, setSelectedWeeklyId] = useState<number | null>(
-        null,
+    const pushScheduleToUrl = useCallback(
+        (sel: ScheduleUrlSelection) => {
+            setSearchParams(
+                (prev) =>
+                    new URLSearchParams(
+                        mergeScheduleIntoSearchString(
+                            `?${prev.toString()}`,
+                            sel,
+                        ),
+                    ),
+                { replace: true },
+            )
+        },
+        [setSearchParams],
     )
-    const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<number | null>(
-        null,
-    )
-    const [selectedSessionTypeId, setSelectedSessionTypeId] = useState<
-        number | null
-    >(null)
-
-    const timeSlotUnlocked = selectedWeeklyId !== null
-    const sessionTypeUnlocked = selectedTimeSlotId !== null
-
-    const timeSlotExpanded = timeSlotUnlocked && timeSlotOpen
-    const sessionTypeExpanded = sessionTypeUnlocked && sessionTypeOpen
-
-    const weeklyBadgeOutline = weeklyOpen || selectedWeeklyId === null
-
-    const timeSlotBadgeOutline = timeSlotOpen || selectedTimeSlotId === null
-
-    const sessionTypeBadgeOutline =
-        sessionTypeOpen || selectedSessionTypeId === null
 
     const {
         data: weeklySchedules = [],
@@ -348,6 +356,120 @@ export default function WeeklySchedule({
         () => mergeWeeklySchedulesWithPresets(weeklySchedules),
         [weeklySchedules],
     )
+
+    const parsedFromUrl = useMemo(
+        () => parseScheduleUrlSearch(`?${searchParams.toString()}`),
+        [searchParams],
+    )
+
+    const urlWeeklyOk =
+        parsedFromUrl.weeklyScheduleId != null &&
+        mergedWeeklyRows.some(
+            (r) =>
+                r.id === parsedFromUrl.weeklyScheduleId &&
+                isScheduleAvailableRow(r),
+        )
+
+    const { data: timeSlotsForUrl = [], isPending: timeSlotsForUrlPending } =
+        useQuery({
+            queryKey: [
+                'course',
+                courseId,
+                'time-slots',
+                parsedFromUrl.weeklyScheduleId,
+            ],
+            queryFn: () =>
+                getCourseTimeSlots(courseId, parsedFromUrl.weeklyScheduleId!),
+            enabled:
+                courseId > 0 &&
+                parsedFromUrl.weeklyScheduleId != null &&
+                urlWeeklyOk,
+        })
+
+    const timeSlotRowsForUrl = useMemo(
+        () => mergeTimeSlotsWithPresets(timeSlotsForUrl),
+        [timeSlotsForUrl],
+    )
+
+    const urlTimeSlotOk =
+        parsedFromUrl.timeSlotId != null &&
+        timeSlotRowsForUrl.some(
+            (r) =>
+                r.id === parsedFromUrl.timeSlotId &&
+                r.available &&
+                r.id != null,
+        )
+
+    const {
+        data: sessionTypesForUrl = [],
+        isPending: sessionTypesForUrlPending,
+    } = useQuery({
+        queryKey: [
+            'course',
+            courseId,
+            'session-types',
+            parsedFromUrl.weeklyScheduleId,
+            parsedFromUrl.timeSlotId,
+        ],
+        queryFn: () =>
+            getCourseSessionTypes(
+                courseId,
+                parsedFromUrl.weeklyScheduleId!,
+                parsedFromUrl.timeSlotId!,
+            ),
+        enabled:
+            courseId > 0 &&
+            urlWeeklyOk &&
+            urlTimeSlotOk &&
+            parsedFromUrl.timeSlotId != null,
+    })
+
+    const urlSessionTypeOk =
+        parsedFromUrl.sessionTypeId != null &&
+        sessionTypesForUrl.some((s) => s.id === parsedFromUrl.sessionTypeId)
+
+    /** Single source of truth: URL + validated API data (no effect-driven selection state). */
+    const selectedWeeklyId = useMemo((): number | null => {
+        if (weeklyLoading || parsedFromUrl.weeklyScheduleId == null) return null
+        return urlWeeklyOk ? parsedFromUrl.weeklyScheduleId : null
+    }, [weeklyLoading, parsedFromUrl.weeklyScheduleId, urlWeeklyOk])
+
+    const selectedTimeSlotId = useMemo((): number | null => {
+        if (selectedWeeklyId == null || parsedFromUrl.timeSlotId == null)
+            return null
+        if (timeSlotsForUrlPending) return null
+        return urlTimeSlotOk ? parsedFromUrl.timeSlotId : null
+    }, [
+        selectedWeeklyId,
+        parsedFromUrl.timeSlotId,
+        urlTimeSlotOk,
+        timeSlotsForUrlPending,
+    ])
+
+    const selectedSessionTypeId = useMemo((): number | null => {
+        if (selectedTimeSlotId == null || parsedFromUrl.sessionTypeId == null)
+            return null
+        if (sessionTypesForUrlPending) return null
+        return urlSessionTypeOk ? parsedFromUrl.sessionTypeId : null
+    }, [
+        selectedTimeSlotId,
+        parsedFromUrl.sessionTypeId,
+        urlSessionTypeOk,
+        sessionTypesForUrlPending,
+    ])
+
+    const timeSlotUnlocked = selectedWeeklyId !== null
+    const sessionTypeUnlocked = selectedTimeSlotId !== null
+
+    const timeSlotExpanded = timeSlotUnlocked && timeSlotOpen
+    const sessionTypeExpanded = sessionTypeUnlocked && sessionTypeOpen
+
+    const weeklyBadgeOutline = weeklyOpen || selectedWeeklyId === null
+
+    const timeSlotBadgeOutline = timeSlotOpen || selectedTimeSlotId === null
+
+    const sessionTypeBadgeOutline =
+        sessionTypeOpen || selectedSessionTypeId === null
 
     const toggleWeekly = () => {
         setWeeklyOpen((o) => !o)
@@ -391,9 +513,11 @@ export default function WeeklySchedule({
                                 items={mergedWeeklyRows}
                                 selectedId={selectedWeeklyId}
                                 onSelect={(id) => {
-                                    setSelectedWeeklyId(id)
-                                    setSelectedTimeSlotId(null)
-                                    setSelectedSessionTypeId(null)
+                                    pushScheduleToUrl({
+                                        weeklyScheduleId: id,
+                                        timeSlotId: null,
+                                        sessionTypeId: null,
+                                    })
                                 }}
                             />
                         )}
@@ -417,8 +541,13 @@ export default function WeeklySchedule({
                         enabled={timeSlotUnlocked}
                         selectedId={selectedTimeSlotId}
                         onSelect={(id) => {
-                            setSelectedTimeSlotId(id)
-                            setSelectedSessionTypeId(null)
+                            if (selectedWeeklyId != null) {
+                                pushScheduleToUrl({
+                                    weeklyScheduleId: selectedWeeklyId,
+                                    timeSlotId: id,
+                                    sessionTypeId: null,
+                                })
+                            }
                         }}
                     />
                 ) : null}
@@ -442,7 +571,18 @@ export default function WeeklySchedule({
                         timeSlotId={selectedTimeSlotId}
                         enabled={sessionTypeUnlocked}
                         selectedId={selectedSessionTypeId}
-                        onSelect={setSelectedSessionTypeId}
+                        onSelect={(id) => {
+                            if (
+                                selectedWeeklyId != null &&
+                                selectedTimeSlotId != null
+                            ) {
+                                pushScheduleToUrl({
+                                    weeklyScheduleId: selectedWeeklyId,
+                                    timeSlotId: selectedTimeSlotId,
+                                    sessionTypeId: id,
+                                })
+                            }
+                        }}
                     />
                 ) : null}
             </div>
