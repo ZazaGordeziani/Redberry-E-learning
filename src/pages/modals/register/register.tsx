@@ -73,7 +73,8 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
         !!formState.errors.username && usernameValue.length > 0
 
     const passwordMismatch =
-        step === 1 && formState.errors.confirmPassword?.message === 'Passwords do not match'
+        step === 1 &&
+        formState.errors.confirmPassword?.message === 'Passwords do not match'
     const iconErrorFilter = passwordMismatch
         ? 'invert(24%) sepia(94%) saturate(6250%) hue-rotate(356deg) brightness(98%) contrast(115%)'
         : undefined
@@ -212,7 +213,8 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                             <p
                                 className={`font-inter text-[14px] leading-3.5 font-medium ${
                                     formState.errors.password &&
-                                    ((formState.touchedFields.password ?? false) ||
+                                    ((formState.touchedFields.password ??
+                                        false) ||
                                         stepTriedNext.password ||
                                         formState.submitCount > 0)
                                         ? 'text-red-500'
@@ -240,7 +242,7 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                                             ? 'text'
                                                             : 'password'
                                                     }
-                                                className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
+                                                    className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
                                                         error &&
                                                         (isTouched ||
                                                             stepTriedNext.password ||
@@ -248,14 +250,14 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                                                 0)
                                                             ? 'border-red-500'
                                                             : 'border-[#D1D1D1]'
-                                                } ${
-                                                    error &&
-                                                    (isTouched ||
-                                                        stepTriedNext.password ||
-                                                        formState.submitCount >
-                                                            0)
-                                                        ? 'text-red-500'
-                                                        : 'text-[#141414]'
+                                                    } ${
+                                                        error &&
+                                                        (isTouched ||
+                                                            stepTriedNext.password ||
+                                                            formState.submitCount >
+                                                                0)
+                                                            ? 'text-red-500'
+                                                            : 'text-[#141414]'
                                                     }`}
                                                 />
                                                 <button
@@ -278,8 +280,7 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                                         aria-hidden="true"
                                                         className="h-5 w-5"
                                                         style={{
-                                                            filter:
-                                                                iconErrorFilter,
+                                                            filter: iconErrorFilter,
                                                         }}
                                                     />
                                                 </button>
@@ -331,7 +332,7 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                                             ? 'text'
                                                             : 'password'
                                                     }
-                                                className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
+                                                    className={`font-inter placeholder:font-inter h-11.75 w-90 rounded-lg border-[1.5px] pr-12 pl-4 text-[14px] leading-3.5 font-medium placeholder:text-[14px] placeholder:leading-3.5 placeholder:font-medium placeholder:text-[#8A8A8A] ${
                                                         error &&
                                                         (isTouched ||
                                                             stepTriedNext.password ||
@@ -339,14 +340,14 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                                                 0)
                                                             ? 'border-red-500'
                                                             : 'border-[#D1D1D1]'
-                                                } ${
-                                                    error &&
-                                                    (isTouched ||
-                                                        stepTriedNext.password ||
-                                                        formState.submitCount >
-                                                            0)
-                                                        ? 'text-red-500'
-                                                        : 'text-[#141414]'
+                                                    } ${
+                                                        error &&
+                                                        (isTouched ||
+                                                            stepTriedNext.password ||
+                                                            formState.submitCount >
+                                                                0)
+                                                            ? 'text-red-500'
+                                                            : 'text-[#141414]'
                                                     }`}
                                                 />
                                                 <button
@@ -369,8 +370,7 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                                         aria-hidden="true"
                                                         className="h-5 w-5"
                                                         style={{
-                                                            filter:
-                                                                iconErrorFilter,
+                                                            filter: iconErrorFilter,
                                                         }}
                                                     />
                                                 </button>
@@ -577,7 +577,8 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                                                 e.preventDefault()
                                                 e.stopPropagation()
                                                 setIsDragActive(false)
-                                                const file = e.dataTransfer.files?.[0]
+                                                const file =
+                                                    e.dataTransfer.files?.[0]
                                                 if (file) handleFile(file)
                                             }}
                                             className={`mt-2 flex h-35 w-90 cursor-pointer flex-col items-center justify-center rounded-lg border-[1.5px] ${

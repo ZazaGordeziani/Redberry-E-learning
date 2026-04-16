@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 
-
 const NotFoundPage = () => {
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-5 text-2xl text-[#4F46E5]">

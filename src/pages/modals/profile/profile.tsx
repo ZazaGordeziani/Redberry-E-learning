@@ -96,13 +96,20 @@ export const Profile = ({ open, onClose }: Props) => {
         [user],
     )
 
-    const { control, clearErrors, setError, watch, reset, handleSubmit, formState } =
-        useForm<z.infer<typeof MobileSchema>>({
-            resolver: zodResolver(MobileSchema),
-            defaultValues,
-            mode: 'onBlur',
-            reValidateMode: 'onBlur',
-        })
+    const {
+        control,
+        clearErrors,
+        setError,
+        watch,
+        reset,
+        handleSubmit,
+        formState,
+    } = useForm<z.infer<typeof MobileSchema>>({
+        resolver: zodResolver(MobileSchema),
+        defaultValues,
+        mode: 'onBlur',
+        reValidateMode: 'onBlur',
+    })
 
     const hasErrors = Object.keys(formState.errors).length > 0
 

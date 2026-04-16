@@ -46,11 +46,17 @@ export default function Header({
                     <button
                         type="button"
                         className="font-inter flex items-center gap-2 text-xl leading-6 font-normal"
-                        style={{ color: isBrowseActive ? '#4F46E5' : '#525252' }}
+                        style={{
+                            color: isBrowseActive ? '#4F46E5' : '#525252',
+                        }}
                         onClick={() => navigate('/courses')}
                     >
                         <img
-                            src={isBrowseActive ? browseCoursesActiveIcon : browseCoursesIcon}
+                            src={
+                                isBrowseActive
+                                    ? browseCoursesActiveIcon
+                                    : browseCoursesIcon
+                            }
                             alt=""
                             aria-hidden="true"
                             className="h-5 w-5"
@@ -104,7 +110,9 @@ export default function Header({
                                     ) : user?.avatar ? (
                                         <span
                                             className="absolute right-0 bottom-0 h-4.5 w-4.5 rounded-full border-2 border-white"
-                                            style={{ backgroundColor: '#F4A316' }}
+                                            style={{
+                                                backgroundColor: '#F4A316',
+                                            }}
                                         />
                                     ) : null}
                                 </span>

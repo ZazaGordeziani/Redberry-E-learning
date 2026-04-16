@@ -12,8 +12,7 @@ type DefaultLayoutOutletContext = {
 }
 
 const MainPage = () => {
-    const { openLoginModal } =
-        useOutletContext<DefaultLayoutOutletContext>()
+    const { openLoginModal } = useOutletContext<DefaultLayoutOutletContext>()
     const user = useAtomValue(userAtom)
     const isLoggedIn = !!user?.token
     const hasEnrollment = false

@@ -187,6 +187,7 @@ const CourseDescription = () => {
                                 courseTitle={course.title}
                                 basePrice={String(course.basePrice)}
                                 enrollment={course.enrollment ?? null}
+                                averageRating={avgRating}
                                 className="mt-28 ml-25 w-full max-w-full"
                             />
                         </aside>

@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type { CourseEnrollmentDetail } from '@/api/courses/index.types'
+import { completeEnrollment } from '@/api/enrollments'
 import {
     displaySessionTitle,
     normalizeSessionKind,
@@ -11,9 +14,10 @@ import calendar2Icon from '@/pages/course-details/components/assets/calendar2.sv
 import clockIcon from '@/pages/course-details/components/assets/clock.svg'
 import locationIcon from '@/pages/course-details/components/assets/location.svg'
 import checkmarkIcon from '@/pages/course-details/components/assets/checkmark.svg'
-import progressBarSvg from '@/pages/course-details/components/assets/progress-bar.svg'
-
-const ENROLLED_PROGRESS_PCT = 65
+import completedSvg from '@/pages/course-details/components/assets/completed.svg'
+import retakeIcon from '@/pages/course-details/components/assets/retake.svg'
+import CompleteCourseCongratulationsModal from '@/pages/course-details/components/modals/complete-course-congratulations-modal'
+import RateYourExperience from '@/pages/course-details/components/rate-your-experience'
 
 const DAY_TITLE: Record<string, string> = {
     monday: 'Monday',
@@ -96,18 +100,52 @@ function InfoRow({ icon, label }: { icon: ReactNode; label: string }) {
     )
 }
 
-export type EnrolledStateProps = {
-    enrollment: CourseEnrollmentDetail
+function isEnrollmentCompleted(e: CourseEnrollmentDetail): boolean {
+    return e.completedAt != null
 }
 
-export default function EnrolledState({ enrollment }: EnrolledStateProps) {
+export type EnrolledStateProps = {
+    courseId: number
+    courseTitle: string
+    enrollment: CourseEnrollmentDetail
+    averageRating: number
+}
+
+export default function EnrolledState({
+    courseId,
+    courseTitle,
+    enrollment,
+    averageRating,
+}: EnrolledStateProps) {
+    const queryClient = useQueryClient()
+    const [rateCardDismissed, setRateCardDismissed] = useState(false)
+    const [completeCongratsOpen, setCompleteCongratsOpen] = useState(false)
     const schedule = enrollment.schedule
     const sessionNameRaw = schedule?.sessionType?.name?.trim() ?? ''
 
+    const completed = isEnrollmentCompleted(enrollment)
+    const progressPct = completed ? 100 : Math.min(100, Math.max(0, enrollment.progress))
+
+    const completeMutation = useMutation({
+        mutationFn: () => completeEnrollment(enrollment.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['course', courseId] })
+            queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+            setCompleteCongratsOpen(true)
+        },
+    })
+
     return (
+        <>
         <div className="flex w-full flex-col">
-            <span className="font-inter inline-flex w-fit rounded-full bg-[#736BEA]/10 px-4 py-2 text-[20px] leading-6 font-semibold text-[#736BEA]">
-                Enrolled
+            <span
+                className={`font-inter inline-flex w-fit rounded-full px-4 py-2 text-[20px] leading-6 font-semibold ${
+                    completed ?
+                        'bg-[#1DC31D]/10 text-[#1DC31D]'
+                    :   'bg-[#736BEA]/10 text-[#736BEA]'
+                }`}
+            >
+                {completed ? 'Completed' : 'Enrolled'}
             </span>
 
             <div className="mt-6 mb-5 flex flex-col gap-7">
@@ -162,36 +200,79 @@ export default function EnrolledState({ enrollment }: EnrolledStateProps) {
             </div>
 
             <p className="font-inter mt-8 mb-4 align-middle text-[20px] leading-6 font-semibold text-[#666666]">
-                {ENROLLED_PROGRESS_PCT}% Complete
+                {progressPct}% Complete
             </p>
 
             <div
                 className="mt-1 w-full"
-                role="progressbar"
-                aria-valuenow={ENROLLED_PROGRESS_PCT}
-                aria-valuemin={0}
-                aria-valuemax={100}
+                role={completed ? undefined : 'progressbar'}
+                aria-valuenow={completed ? undefined : progressPct}
+                aria-valuemin={completed ? undefined : 0}
+                aria-valuemax={completed ? undefined : 100}
             >
-                <img
-                    src={progressBarSvg}
-                    alt=""
-                    aria-hidden
-                    className="block h-auto w-full max-w-full"
-                />
+                {completed ?
+                    <img
+                        src={completedSvg}
+                        alt=""
+                        aria-hidden
+                        className="block h-auto w-full max-w-full"
+                    />
+                :   <div className="h-6 w-full overflow-hidden rounded-[11.75px] bg-[#DDDBFA]">
+                        <div
+                            className="h-full min-w-0 rounded-[11.75px] bg-[#4F46E5] transition-[width] duration-300 ease-out"
+                            style={{ width: `${progressPct}%` }}
+                        />
+                    </div>
+                }
             </div>
 
-            <button
-                type="button"
-                className="font-inter mt-9 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-4 text-[20px] leading-[100%] font-medium text-white transition-colors hover:bg-[#4338CA]"
-            >
-                Complete Course
-                <img
-                    src={checkmarkIcon}
-                    alt=""
-                    aria-hidden
-                    className="h-5.5 w-5.5 shrink-0"
-                />
-            </button>
+            {completed ?
+                <>
+                    <button
+                        type="button"
+                        className="font-inter mt-9 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-4 text-[20px] leading-[100%] font-medium text-white transition-colors hover:bg-[#4338CA]"
+                    >
+                        Retake Course
+                        <img
+                            src={retakeIcon}
+                            alt=""
+                            aria-hidden
+                            className="h-5.5 w-5.5 shrink-0"
+                        />
+                    </button>
+                    {!rateCardDismissed && !completeCongratsOpen ?
+                        <RateYourExperience
+                            averageRating={averageRating}
+                            courseId={courseId}
+                            instanceId="sidebar"
+                            onDismiss={() => setRateCardDismissed(true)}
+                        />
+                    :   null}
+                </>
+            :   <button
+                    type="button"
+                    disabled={completeMutation.isPending}
+                    onClick={() => completeMutation.mutate()}
+                    className="font-inter mt-9 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-4 text-[20px] leading-[100%] font-medium text-white transition-colors hover:bg-[#4338CA] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                    {completeMutation.isPending ? 'Completing…' : 'Complete Course'}
+                    <img
+                        src={checkmarkIcon}
+                        alt=""
+                        aria-hidden
+                        className="h-5.5 w-5.5 shrink-0"
+                    />
+                </button>
+            }
         </div>
+
+        <CompleteCourseCongratulationsModal
+            open={completeCongratsOpen}
+            onClose={() => setCompleteCongratsOpen(false)}
+            averageRating={averageRating}
+            courseId={courseId}
+            courseTitle={courseTitle}
+        />
+        </>
     )
 }

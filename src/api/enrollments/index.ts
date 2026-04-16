@@ -30,3 +30,11 @@ export async function getMyEnrollments() {
         )
     return res.data.data ?? []
 }
+
+export async function completeEnrollment(enrollmentId: number) {
+    const res = await httpClient.patch<{
+        data: CourseEnrollmentDetail
+        message?: string
+    }>(`/enrollments/${enrollmentId}/complete`)
+    return res.data.data
+}
