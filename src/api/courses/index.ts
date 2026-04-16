@@ -3,6 +3,7 @@ import { httpClient } from '@/api'
 import type {
     Category,
     Course,
+    CourseDetail,
     Instructor,
     ListResponse,
     Topic,
@@ -31,5 +32,10 @@ export async function getCourses(params?: { page?: number; perPage?: number }) {
         },
     })
     return res.data
+}
+
+export async function getCourseById(id: number) {
+    const res = await httpClient.get<{ data: CourseDetail }>(`/courses/${id}`)
+    return res.data.data
 }
 

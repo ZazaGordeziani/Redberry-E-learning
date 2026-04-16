@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
 import ratingFullStar from '@/assets/rating-full-star.svg'
@@ -291,12 +292,12 @@ const CourseCard = ({ course }: { course: Course }) => {
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        className="font-inter rounded-lg bg-[#4F46E5] px-4.25 py-2.5 text-center text-[16px] leading-6 font-medium text-white"
+                    <Link
+                        to={`/courses/${course.id}`}
+                        className="font-inter inline-flex rounded-lg bg-[#4F46E5] px-4.25 py-2.5 text-center text-[16px] leading-6 font-medium text-white"
                     >
                         Details
-                    </button>
+                    </Link>
                 </div>
             </div>
         </article>

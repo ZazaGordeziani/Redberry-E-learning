@@ -17,7 +17,6 @@ type CategoryFilterGlyphProps = {
     className?: string
 }
 
-/** Renders category SVGs from `assets/` with `fill="currentColor"` so parent `color` controls tint. */
 export function CategoryFilterGlyph({
     iconKey,
     className,
