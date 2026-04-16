@@ -47,7 +47,7 @@ export default function EnrolledCoursesSidebar({
             />
 
             <aside
-                className="relative z-10 flex w-[min(100%,794px)] shrink-0 flex-col bg-[#F5F5F5]"
+                className="relative z-10 flex w-198.5 shrink-0 flex-col bg-[#F5F5F5]"
                 style={{
                     marginTop: HEADER_OFFSET_PX,
                     height: `calc(100vh - ${HEADER_OFFSET_PX}px)`,
@@ -56,7 +56,7 @@ export default function EnrolledCoursesSidebar({
                 aria-modal="true"
                 aria-labelledby="enrolled-courses-heading"
             >
-                <div className="flex shrink-0 flex-row items-start justify-between px-20 pt-20">
+                <div className="flex shrink-0 flex-row items-start justify-between px-17 pt-20">
                     <h2
                         id="enrolled-courses-heading"
                         className="font-inter text-[40px] leading-[100%] font-semibold text-[#0A0A0A]"
@@ -71,7 +71,7 @@ export default function EnrolledCoursesSidebar({
                     </p>
                 </div>
 
-                <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto px-7.5 pt-8 pb-8">
+                <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden pt-8 pb-8">
                     {isLoading ? (
                         <div className="flex flex-1 flex-col items-center justify-center">
                             <p className="font-inter text-center text-[16px] text-[#666666]">
@@ -96,7 +96,7 @@ export default function EnrolledCoursesSidebar({
                             <Link
                                 to="/courses"
                                 onClick={onClose}
-                                className="font-inter mt-6.25 inline-flex items-center justify-center rounded-lg bg-[#4F46E5] px-8 py-3 text-[16px] leading-6 font-medium text-white transition-colors hover:bg-[#4338CA]"
+                                className="font-inter mt-6.25 inline-flex items-center justify-center rounded-lg bg-[#4F46E5] px-8 py-3 text-[16px] leading-6 font-medium text-white hover:bg-[#4338CA]"
                             >
                                 Browse Courses
                             </Link>
@@ -104,7 +104,7 @@ export default function EnrolledCoursesSidebar({
                     ) : (
                         <ul className="flex flex-col gap-6">
                             {enrollments.map((e) => (
-                                <li key={e.id} className="flex justify-center">
+                                <li key={e.id} className="flex justify-start">
                                     <EnrolledCourseCard
                                         enrollment={e}
                                         onNavigate={onClose}

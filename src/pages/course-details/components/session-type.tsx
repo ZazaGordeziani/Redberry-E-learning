@@ -269,7 +269,7 @@ export function SessionTypesPicker({
                 return (
                     <div
                         key={item.kind}
-                        className="flex min-w-0 flex-1 basis-35 flex-col items-center sm:basis-40"
+                        className="flex min-w-0 flex-1 basis-35 flex-col items-center"
                     >
                         <button
                             type="button"

@@ -12,7 +12,7 @@ export const ContinueLearningSection = ({
     return (
         <section className="pt-2 pb-43">
             <div className="mx-auto w-full max-w-391.5">
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 text-left">
                     <h2 className="font-inter text-[40px] leading-10 font-semibold text-black">
                         Continue Learning
                     </h2>

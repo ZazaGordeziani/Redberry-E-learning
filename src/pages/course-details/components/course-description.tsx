@@ -84,10 +84,10 @@ const CourseDescription = () => {
 
     return (
         <section className="flex w-full flex-1 flex-col self-stretch">
-            <div className="mx-auto flex w-full max-w-391.5 flex-1 flex-col px-4 pt-10 pb-5 sm:px-0">
+            <div className="mx-auto flex w-full max-w-397 flex-1 flex-col px-4 pt-10 pb-5">
                 <div className="w-full max-w-full">
-                    <div className="flex flex-col gap-7.5 lg:flex-row lg:items-start">
-                        <div className="w-full max-w-225.75 min-w-0 shrink-0">
+                    <div className="flex w-full flex-row flex-nowrap items-start gap-32">
+                        <div className="max-w-225.75 min-w-0 flex-1 shrink">
                             <CourseDescriptionBreadCrumbs
                                 categoryName={course.category.name}
                             />
@@ -180,7 +180,7 @@ const CourseDescription = () => {
                             </div>
                         </div>
 
-                        <aside className="w-132.5 min-w-0 shrink-0">
+                        <aside className="mt-28 w-131 shrink-0">
                             <WeeklySchedule
                                 key={course.id}
                                 courseId={course.id}
@@ -188,7 +188,7 @@ const CourseDescription = () => {
                                 basePrice={String(course.basePrice)}
                                 enrollment={course.enrollment ?? null}
                                 averageRating={avgRating}
-                                className="mt-28 ml-25 w-full max-w-full"
+                                className="w-full"
                             />
                         </aside>
                     </div>
