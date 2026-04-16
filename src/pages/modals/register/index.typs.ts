@@ -18,4 +18,3 @@ export const RegisterFormDefaultValues = {
     password: '',
     confirmPassword: '',
 }
-

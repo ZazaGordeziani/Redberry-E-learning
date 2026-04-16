@@ -1,18 +1,18 @@
 {
-  "compilerOptions": {
-    "isolatedModules": false,
-    // "noEmitOnError": true,
-    // "strict": true,
-    // "noImplicitAny": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "~/*": ["."]
-    }
-  },
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+    "compilerOptions": {
+        "isolatedModules": false,
+        // "noEmitOnError": true,
+        // "strict": true,
+        // "noImplicitAny": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"],
+            "~/*": ["."]
+        }
+    },
+    "files": [],
+    "references": [
+        { "path": "./tsconfig.app.json" },
+        { "path": "./tsconfig.node.json" }
+    ]
 }

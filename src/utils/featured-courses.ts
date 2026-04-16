@@ -31,10 +31,7 @@ export type FeaturedCoursesResponse = {
 }
 
 export async function getFeaturedCourses() {
-    const res = await httpClient.get<FeaturedCoursesResponse>(
-        '/courses/featured',
-    )
+    const res =
+        await httpClient.get<FeaturedCoursesResponse>('/courses/featured')
     return res.data.data
 }
-
-

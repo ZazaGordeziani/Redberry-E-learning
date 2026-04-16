@@ -19,4 +19,3 @@ export type UpdateProfilePayload = {
     age?: number | null
     avatar?: File | null
 }
-

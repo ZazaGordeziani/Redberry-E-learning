@@ -22,4 +22,3 @@ export const register = async (form: RegisterFormValues) => {
 
     return response.data?.data
 }
-

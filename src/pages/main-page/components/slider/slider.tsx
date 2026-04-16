@@ -84,7 +84,8 @@ export const MainPageSlider = () => {
                                 type="button"
                                 className="font-inter h-16 w-51.5 rounded-lg bg-[#4F46E5] text-center text-[20px] leading-5 font-medium"
                                 onClick={() => {
-                                    if (activeSlide.id === 0) navigate('/courses')
+                                    if (activeSlide.id === 0)
+                                        navigate('/courses')
                                 }}
                             >
                                 {activeSlide.buttonText}

@@ -64,6 +64,10 @@ export async function getCourseTimeSlots(
     return res.data.data
 }
 
+export async function submitCourseReview(courseId: number, rating: number) {
+    await httpClient.post(`/courses/${courseId}/reviews`, { rating })
+}
+
 export async function getCourseSessionTypes(
     courseId: number,
     weeklyScheduleId: number,

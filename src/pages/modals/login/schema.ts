@@ -5,4 +5,3 @@ export const LoginFormSchema = z.object({
     // Don't enforce length rules here; backend determines credential validity.
     password: z.string().min(1, { message: 'Password is required' }),
 })
-

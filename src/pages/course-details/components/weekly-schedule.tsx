@@ -8,10 +8,7 @@ import {
     conflictingScheduleSummaryFromError,
     isEnrollmentScheduleConflict,
 } from '@/api/enrollments/conflict'
-import {
-    createEnrollment,
-    getMyEnrollments,
-} from '@/api/enrollments'
+import { createEnrollment, getMyEnrollments } from '@/api/enrollments'
 import { findConflictingCourseTitleFromEnrollments } from '@/api/enrollments/findConflictingCourse'
 import {
     getCourseSessionTypes,
@@ -369,6 +366,7 @@ export type WeeklyScheduleProps = {
     courseTitle: string
     basePrice: string
     enrollment?: CourseEnrollmentDetail | null
+    averageRating?: number
     className?: string
 }
 
@@ -377,6 +375,7 @@ export default function WeeklySchedule({
     courseTitle,
     basePrice,
     enrollment = null,
+    averageRating = 0,
     className = '',
 }: WeeklyScheduleProps) {
     const queryClient = useQueryClient()
@@ -522,7 +521,6 @@ export default function WeeklySchedule({
         parsedFromUrl.sessionTypeId != null &&
         sessionTypesForUrl.some((s) => s.id === parsedFromUrl.sessionTypeId)
 
-    /** Single source of truth: URL + validated API data (no effect-driven selection state). */
     const selectedWeeklyId = useMemo((): number | null => {
         if (weeklyLoading || parsedFromUrl.weeklyScheduleId == null) return null
         return urlWeeklyOk ? parsedFromUrl.weeklyScheduleId : null
@@ -563,10 +561,11 @@ export default function WeeklySchedule({
         return row?.kind ?? null
     }, [sessionTypeRows, selectedSessionTypeId])
 
-    /** Backend enrolls by course + course schedule (resolved from chosen session type). */
     const selectedCourseScheduleId = useMemo((): number | null => {
         if (selectedSessionTypeId == null) return null
-        const opt = sessionTypesForUrl.find((s) => s.id === selectedSessionTypeId)
+        const opt = sessionTypesForUrl.find(
+            (s) => s.id === selectedSessionTypeId,
+        )
         const cs = opt?.courseScheduleId
         if (cs == null || !Number.isFinite(cs) || cs <= 0) return null
         return cs
@@ -678,142 +677,147 @@ export default function WeeklySchedule({
             <div
                 className={`flex w-full min-w-0 flex-col gap-8 ${className}`.trim()}
             >
-                <EnrolledState enrollment={enrollment} />
+                <EnrolledState
+                    averageRating={averageRating}
+                    courseId={courseId}
+                    courseTitle={courseTitle}
+                    enrollment={enrollment}
+                />
             </div>
         ) : (
             <div
                 className={`flex w-full min-w-0 flex-col gap-8 ${className}`.trim()}
             >
-            <div>
-                <AccordionHeader
-                    step={1}
-                    title="Weekly Schedule"
-                    expanded={weeklyOpen}
-                    disabled={false}
-                    onToggle={toggleWeekly}
-                    badgeShowsOutline={weeklyBadgeOutline}
-                />
-                {weeklyOpen ? (
-                    <div>
-                        {weeklyLoading ? (
-                            <p className="font-inter mt-6 text-[16px] font-medium text-[#666666]">
-                                Loading schedules…
-                            </p>
-                        ) : weeklyError ? (
-                            <p className="font-inter mt-6 text-[16px] font-medium text-[#666666]">
-                                Could not load weekly schedules.
-                            </p>
-                        ) : (
-                            <WeeklyScheduleCards
-                                items={mergedWeeklyRows}
-                                selectedId={selectedWeeklyId}
-                                onSelect={(id) => {
+                <div>
+                    <AccordionHeader
+                        step={1}
+                        title="Weekly Schedule"
+                        expanded={weeklyOpen}
+                        disabled={false}
+                        onToggle={toggleWeekly}
+                        badgeShowsOutline={weeklyBadgeOutline}
+                    />
+                    {weeklyOpen ? (
+                        <div>
+                            {weeklyLoading ? (
+                                <p className="font-inter mt-6 text-[16px] font-medium text-[#666666]">
+                                    Loading schedules…
+                                </p>
+                            ) : weeklyError ? (
+                                <p className="font-inter mt-6 text-[16px] font-medium text-[#666666]">
+                                    Could not load weekly schedules.
+                                </p>
+                            ) : (
+                                <WeeklyScheduleCards
+                                    items={mergedWeeklyRows}
+                                    selectedId={selectedWeeklyId}
+                                    onSelect={(id) => {
+                                        pushScheduleToUrl({
+                                            weeklyScheduleId: id,
+                                            timeSlotId: null,
+                                            sessionTypeId: null,
+                                        })
+                                    }}
+                                />
+                            )}
+                        </div>
+                    ) : null}
+                </div>
+
+                <div>
+                    <AccordionHeader
+                        step={2}
+                        title="Time Slot"
+                        expanded={timeSlotExpanded}
+                        disabled={!timeSlotUnlocked}
+                        onToggle={toggleTimeSlot}
+                        badgeShowsOutline={timeSlotBadgeOutline}
+                    />
+                    {timeSlotExpanded && selectedWeeklyId != null ? (
+                        <TimeSlotsPicker
+                            courseId={courseId}
+                            weeklyScheduleId={selectedWeeklyId}
+                            enabled={timeSlotUnlocked}
+                            selectedId={selectedTimeSlotId}
+                            onSelect={(id) => {
+                                if (selectedWeeklyId != null) {
                                     pushScheduleToUrl({
-                                        weeklyScheduleId: id,
-                                        timeSlotId: null,
+                                        weeklyScheduleId: selectedWeeklyId,
+                                        timeSlotId: id,
                                         sessionTypeId: null,
                                     })
-                                }}
-                            />
-                        )}
-                    </div>
-                ) : null}
-            </div>
+                                }
+                            }}
+                        />
+                    ) : null}
+                </div>
 
-            <div>
-                <AccordionHeader
-                    step={2}
-                    title="Time Slot"
-                    expanded={timeSlotExpanded}
-                    disabled={!timeSlotUnlocked}
-                    onToggle={toggleTimeSlot}
-                    badgeShowsOutline={timeSlotBadgeOutline}
+                <div>
+                    <AccordionHeader
+                        step={3}
+                        title="Session Type"
+                        expanded={sessionTypeExpanded}
+                        disabled={!sessionTypeUnlocked}
+                        onToggle={toggleSessionType}
+                        badgeShowsOutline={sessionTypeBadgeOutline}
+                    />
+                    {sessionTypeExpanded &&
+                    selectedWeeklyId != null &&
+                    selectedTimeSlotId != null ? (
+                        <SessionTypesPicker
+                            courseId={courseId}
+                            weeklyScheduleId={selectedWeeklyId}
+                            timeSlotId={selectedTimeSlotId}
+                            enabled={sessionTypeUnlocked}
+                            selectedId={selectedSessionTypeId}
+                            onSelect={(id) => {
+                                if (
+                                    selectedWeeklyId != null &&
+                                    selectedTimeSlotId != null
+                                ) {
+                                    pushScheduleToUrl({
+                                        weeklyScheduleId: selectedWeeklyId,
+                                        timeSlotId: selectedTimeSlotId,
+                                        sessionTypeId: id,
+                                    })
+                                }
+                            }}
+                        />
+                    ) : null}
+                </div>
+
+                <TotalPrice
+                    basePrice={basePrice}
+                    selectionComplete={selectionComplete}
+                    sessionKind={selectedSessionKind}
+                    isLoggedIn={isLoggedIn}
+                    profileComplete={profileComplete}
+                    enrollPending={enrollMutation.isPending}
+                    onEnroll={() => {
+                        if (
+                            selectedCourseScheduleId == null ||
+                            selectedSessionTypeId == null
+                        ) {
+                            return
+                        }
+                        enrollMutation.mutate({
+                            courseId,
+                            courseScheduleId: selectedCourseScheduleId,
+                        })
+                    }}
                 />
-                {timeSlotExpanded && selectedWeeklyId != null ? (
-                    <TimeSlotsPicker
-                        courseId={courseId}
-                        weeklyScheduleId={selectedWeeklyId}
-                        enabled={timeSlotUnlocked}
-                        selectedId={selectedTimeSlotId}
-                        onSelect={(id) => {
-                            if (selectedWeeklyId != null) {
-                                pushScheduleToUrl({
-                                    weeklyScheduleId: selectedWeeklyId,
-                                    timeSlotId: id,
-                                    sessionTypeId: null,
-                                })
-                            }
-                        }}
+
+                {!isLoggedIn ? (
+                    <EnrollmentWarning
+                        variant="auth"
+                        onAction={openLoginModal}
+                    />
+                ) : !profileComplete ? (
+                    <EnrollmentWarning
+                        variant="profile"
+                        onAction={openProfileModal}
                     />
                 ) : null}
-            </div>
-
-            <div>
-                <AccordionHeader
-                    step={3}
-                    title="Session Type"
-                    expanded={sessionTypeExpanded}
-                    disabled={!sessionTypeUnlocked}
-                    onToggle={toggleSessionType}
-                    badgeShowsOutline={sessionTypeBadgeOutline}
-                />
-                {sessionTypeExpanded &&
-                selectedWeeklyId != null &&
-                selectedTimeSlotId != null ? (
-                    <SessionTypesPicker
-                        courseId={courseId}
-                        weeklyScheduleId={selectedWeeklyId}
-                        timeSlotId={selectedTimeSlotId}
-                        enabled={sessionTypeUnlocked}
-                        selectedId={selectedSessionTypeId}
-                        onSelect={(id) => {
-                            if (
-                                selectedWeeklyId != null &&
-                                selectedTimeSlotId != null
-                            ) {
-                                pushScheduleToUrl({
-                                    weeklyScheduleId: selectedWeeklyId,
-                                    timeSlotId: selectedTimeSlotId,
-                                    sessionTypeId: id,
-                                })
-                            }
-                        }}
-                    />
-                ) : null}
-            </div>
-
-            <TotalPrice
-                basePrice={basePrice}
-                selectionComplete={selectionComplete}
-                sessionKind={selectedSessionKind}
-                isLoggedIn={isLoggedIn}
-                profileComplete={profileComplete}
-                enrollPending={enrollMutation.isPending}
-                onEnroll={() => {
-                    if (
-                        selectedCourseScheduleId == null ||
-                        selectedSessionTypeId == null
-                    ) {
-                        return
-                    }
-                    enrollMutation.mutate({
-                        courseId,
-                        courseScheduleId: selectedCourseScheduleId,
-                    })
-                }}
-            />
-
-            {!isLoggedIn ? (
-                <EnrollmentWarning
-                    variant="auth"
-                    onAction={openLoginModal}
-                />
-            ) : !profileComplete ? (
-                <EnrollmentWarning
-                    variant="profile"
-                    onAction={openProfileModal}
-                />
-            ) : null}
             </div>
         )
 
