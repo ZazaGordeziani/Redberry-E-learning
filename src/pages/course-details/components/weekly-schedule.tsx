@@ -1,25 +1,43 @@
 import { useAtomValue } from 'jotai'
 import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import {
+    conflictingCourseTitleForModal,
+    conflictingScheduleSummaryFromError,
+    isEnrollmentScheduleConflict,
+} from '@/api/enrollments/conflict'
+import {
+    createEnrollment,
+    getMyEnrollments,
+} from '@/api/enrollments'
+import { findConflictingCourseTitleFromEnrollments } from '@/api/enrollments/findConflictingCourse'
 import {
     getCourseSessionTypes,
     getCourseTimeSlots,
     getCourseWeeklySchedules,
 } from '@/api/courses'
+import type {
+    CourseEnrollmentDetail,
+    CourseTimeSlotOption,
+    WeeklySchedule as WeeklyScheduleApi,
+} from '@/api/courses/index.types'
 import {
     mergeSessionTypesWithPresets,
     SessionTypesPicker,
 } from '@/pages/course-details/components/session-type'
+import EnrolledState from '@/pages/course-details/components/enrolled-state'
+import EnrollmentConflictModal from '@/pages/course-details/components/modals/enrollment-conflict'
+import EnrollmentModal from '@/pages/course-details/components/modals/enrollment-modal'
 import TotalPrice from '@/pages/course-details/components/total-price'
 import { EnrollmentWarning } from '@/pages/course-details/components/warnings'
 import { userAtom } from '@/store/auth'
 import {
+    formatTimeSlotRange,
     mergeTimeSlotsWithPresets,
     TimeSlotsPicker,
 } from '@/pages/course-details/components/time-slots'
-import type { WeeklySchedule as WeeklyScheduleApi } from '@/api/courses/index.types'
 import {
     mergeScheduleIntoSearchString,
     parseScheduleUrlSearch,
@@ -155,6 +173,34 @@ function mergeWeeklySchedulesWithPresets(
 
 function isScheduleAvailableRow(row: WeeklyScheduleRow): boolean {
     return row.available && row.id != null
+}
+
+function buildScheduleConflictSummary(
+    weeklyRows: WeeklyScheduleRow[],
+    weeklyId: number | null,
+    timeSlots: CourseTimeSlotOption[],
+    timeSlotId: number | null,
+): string {
+    const row = weeklyRows.find((r) => r.id === weeklyId)
+    const slot = timeSlots.find((t) => t.id === timeSlotId)
+    if (!row || !slot) return '—'
+    const days = formatWeeklyScheduleCardLabel({
+        id: row.id ?? 0,
+        label: row.label,
+        days: row.days,
+    })
+    let timePart = ''
+    if (slot.startTime && slot.endTime) {
+        timePart = formatTimeSlotRange(slot.startTime, slot.endTime)
+            .replace(/\s*[–—]\s*/g, '-')
+            .replace(/\s/g, '')
+    } else {
+        const m = slot.label.match(/\(([^)]+)\)/)
+        timePart = m
+            ? m[1].replace(/\s*[–—]\s*/g, '-').replace(/\s/g, '')
+            : slot.label.replace(/\s/g, '')
+    }
+    return `${days} at ${timePart}`
 }
 
 function StepBadge({
@@ -320,15 +366,20 @@ function WeeklyScheduleCards({
 
 export type WeeklyScheduleProps = {
     courseId: number
+    courseTitle: string
     basePrice: string
+    enrollment?: CourseEnrollmentDetail | null
     className?: string
 }
 
 export default function WeeklySchedule({
     courseId,
+    courseTitle,
     basePrice,
+    enrollment = null,
     className = '',
 }: WeeklyScheduleProps) {
+    const queryClient = useQueryClient()
     const user = useAtomValue(userAtom)
     const isLoggedIn = !!user?.token
     const profileComplete = user?.profileComplete === true
@@ -338,6 +389,14 @@ export default function WeeklySchedule({
     const [weeklyOpen, setWeeklyOpen] = useState(true)
     const [timeSlotOpen, setTimeSlotOpen] = useState(false)
     const [sessionTypeOpen, setSessionTypeOpen] = useState(false)
+    const [enrollmentSuccessOpen, setEnrollmentSuccessOpen] = useState(false)
+    const [conflictOpen, setConflictOpen] = useState(false)
+    const [conflictCourseName, setConflictCourseName] = useState('')
+    const [conflictScheduleSummary, setConflictScheduleSummary] = useState('')
+    const [pendingEnrollment, setPendingEnrollment] = useState<{
+        courseId: number
+        courseScheduleId: number
+    } | null>(null)
 
     const pushScheduleToUrl = useCallback(
         (sel: ScheduleUrlSelection) => {
@@ -504,10 +563,75 @@ export default function WeeklySchedule({
         return row?.kind ?? null
     }, [sessionTypeRows, selectedSessionTypeId])
 
+    /** Backend enrolls by course + course schedule (resolved from chosen session type). */
+    const selectedCourseScheduleId = useMemo((): number | null => {
+        if (selectedSessionTypeId == null) return null
+        const opt = sessionTypesForUrl.find((s) => s.id === selectedSessionTypeId)
+        const cs = opt?.courseScheduleId
+        if (cs == null || !Number.isFinite(cs) || cs <= 0) return null
+        return cs
+    }, [sessionTypesForUrl, selectedSessionTypeId])
+
+    const enrollMutation = useMutation({
+        mutationFn: createEnrollment,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['course', courseId] })
+            queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+            setEnrollmentSuccessOpen(true)
+            setConflictOpen(false)
+            setPendingEnrollment(null)
+        },
+        onError: async (error, variables) => {
+            if (!isEnrollmentScheduleConflict(error)) return
+            setPendingEnrollment({
+                courseId: variables.courseId,
+                courseScheduleId: variables.courseScheduleId,
+            })
+
+            let courseName = conflictingCourseTitleForModal(error)
+
+            if (
+                !courseName &&
+                selectedWeeklyId != null &&
+                selectedTimeSlotId != null &&
+                selectedSessionTypeId != null &&
+                selectedCourseScheduleId != null
+            ) {
+                try {
+                    const list = await getMyEnrollments()
+                    courseName =
+                        findConflictingCourseTitleFromEnrollments(
+                            list,
+                            courseId,
+                            selectedWeeklyId,
+                            selectedTimeSlotId,
+                            selectedSessionTypeId,
+                            selectedCourseScheduleId,
+                        ) ?? ''
+                } catch {
+                    courseName = ''
+                }
+            }
+
+            setConflictCourseName(courseName)
+            setConflictScheduleSummary(
+                conflictingScheduleSummaryFromError(error) ??
+                    buildScheduleConflictSummary(
+                        mergedWeeklyRows,
+                        selectedWeeklyId,
+                        timeSlotsForUrl,
+                        selectedTimeSlotId,
+                    ),
+            )
+            setConflictOpen(true)
+        },
+    })
+
     const selectionComplete =
         selectedWeeklyId != null &&
         selectedTimeSlotId != null &&
-        selectedSessionTypeId != null
+        selectedSessionTypeId != null &&
+        selectedCourseScheduleId != null
 
     const timeSlotUnlocked = selectedWeeklyId !== null
     const sessionTypeUnlocked = selectedTimeSlotId !== null
@@ -536,10 +660,30 @@ export default function WeeklySchedule({
         setSessionTypeOpen((o) => !o)
     }
 
-    return (
-        <div
-            className={`flex w-full min-w-0 flex-col gap-8 ${className}`.trim()}
-        >
+    const closeConflictModal = useCallback(() => {
+        setConflictOpen(false)
+        setPendingEnrollment(null)
+    }, [])
+
+    const continueEnrollmentDespiteConflict = useCallback(() => {
+        if (pendingEnrollment == null) return
+        enrollMutation.mutate({
+            ...pendingEnrollment,
+            force: true,
+        })
+    }, [pendingEnrollment, enrollMutation])
+
+    const sidebar =
+        enrollment != null ? (
+            <div
+                className={`flex w-full min-w-0 flex-col gap-8 ${className}`.trim()}
+            >
+                <EnrolledState enrollment={enrollment} />
+            </div>
+        ) : (
+            <div
+                className={`flex w-full min-w-0 flex-col gap-8 ${className}`.trim()}
+            >
             <div>
                 <AccordionHeader
                     step={1}
@@ -644,6 +788,19 @@ export default function WeeklySchedule({
                 sessionKind={selectedSessionKind}
                 isLoggedIn={isLoggedIn}
                 profileComplete={profileComplete}
+                enrollPending={enrollMutation.isPending}
+                onEnroll={() => {
+                    if (
+                        selectedCourseScheduleId == null ||
+                        selectedSessionTypeId == null
+                    ) {
+                        return
+                    }
+                    enrollMutation.mutate({
+                        courseId,
+                        courseScheduleId: selectedCourseScheduleId,
+                    })
+                }}
             />
 
             {!isLoggedIn ? (
@@ -657,6 +814,25 @@ export default function WeeklySchedule({
                     onAction={openProfileModal}
                 />
             ) : null}
-        </div>
+            </div>
+        )
+
+    return (
+        <>
+            {sidebar}
+            <EnrollmentConflictModal
+                open={conflictOpen}
+                onClose={closeConflictModal}
+                onContinue={continueEnrollmentDespiteConflict}
+                conflictingCourseName={conflictCourseName}
+                scheduleSummary={conflictScheduleSummary}
+                continuePending={enrollMutation.isPending && conflictOpen}
+            />
+            <EnrollmentModal
+                open={enrollmentSuccessOpen}
+                onClose={() => setEnrollmentSuccessOpen(false)}
+                courseTitle={courseTitle}
+            />
+        </>
     )
 }

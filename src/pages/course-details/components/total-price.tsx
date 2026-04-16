@@ -27,6 +27,7 @@ export type TotalPriceProps = {
     isLoggedIn: boolean
     profileComplete: boolean
     onEnroll?: () => void
+    enrollPending?: boolean
 }
 
 export function TotalPrice({
@@ -36,6 +37,7 @@ export function TotalPrice({
     isLoggedIn,
     profileComplete,
     onEnroll,
+    enrollPending = false,
 }: TotalPriceProps) {
     const baseNum = selectionComplete ? parsePrice(basePrice) : 0
     const sessionAddon =
@@ -45,7 +47,7 @@ export function TotalPrice({
     const total = baseNum + sessionAddon
 
     const canEnroll = selectionComplete && isLoggedIn && profileComplete
-    const enrollDisabled = !canEnroll
+    const enrollDisabled = !canEnroll || enrollPending
 
     return (
         <div className="w-full rounded-xl border border-[#F5F5F5] bg-white p-6">
@@ -80,14 +82,14 @@ export function TotalPrice({
             <button
                 type="button"
                 disabled={enrollDisabled}
-                onClick={() => canEnroll && onEnroll?.()}
+                onClick={() => canEnroll && !enrollPending && onEnroll?.()}
                 className={`font-inter mt-8 mb-3 w-full rounded-xl py-4 text-center text-[20px] leading-6 font-semibold transition-colors ${
-                    canEnroll
+                    canEnroll && !enrollPending
                         ? 'cursor-pointer bg-[#281ED2] text-white hover:bg-[#4F46E5]'
                         : 'cursor-not-allowed bg-[#EEEDFC] text-[#B7B3F4]'
                 }`}
             >
-                Enroll Now
+                {enrollPending ? 'Enrolling…' : 'Enroll Now'}
             </button>
         </div>
     )

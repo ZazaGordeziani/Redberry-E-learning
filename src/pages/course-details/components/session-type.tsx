@@ -34,7 +34,10 @@ function SvgGlyph({
     )
 }
 
-function normalizeSessionKind(name: string): 'online' | 'in_person' | 'hybrid' {
+//eslint-disable-next-line
+export function normalizeSessionKind(
+    name: string,
+): 'online' | 'in_person' | 'hybrid' {
     const n = name.toLowerCase().replace(/-/g, '_')
     if (n.includes('online')) return 'online'
     if (n.includes('hybrid')) return 'hybrid'
@@ -55,7 +58,23 @@ function sessionKindIcon(kind: ReturnType<typeof normalizeSessionKind>) {
     return hybridSvgRaw
 }
 
-/** USD add-on for session type (aligned with priceLineForSession). */
+/** Session kind icon for a raw API session name (e.g. enrollment schedule). */
+export function SessionTypeKindIcon({
+    name,
+    className = 'h-6 w-6 shrink-0 text-[#525252]',
+}: {
+    name: string
+    className?: string
+}) {
+    return (
+        <SvgGlyph
+            raw={sessionKindIcon(normalizeSessionKind(name))}
+            className={className}
+        />
+    )
+}
+
+//eslint-disable-next-line
 export function sessionSurchargeUsd(
     kind: 'online' | 'in_person' | 'hybrid',
 ): number {
@@ -239,7 +258,6 @@ export function SessionTypesPicker({
                           ? trimmedLocation
                           : '-'
 
-                /** Disabled cards still show venue; keep address readable vs fully muted title. */
                 const locationLineClass = selectable
                     ? selected
                         ? 'text-[#4F46E5]'
