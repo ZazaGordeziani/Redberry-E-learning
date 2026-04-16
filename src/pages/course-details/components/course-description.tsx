@@ -182,6 +182,7 @@ const CourseDescription = () => {
 
                         <aside className="w-132.5 min-w-0 shrink-0">
                             <WeeklySchedule
+                                key={course.id}
                                 courseId={course.id}
                                 className="mt-28 ml-25 w-full max-w-full"
                             />

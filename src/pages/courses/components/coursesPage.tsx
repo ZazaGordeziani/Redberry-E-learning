@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 
 import ratingFullStar from '@/assets/rating-full-star.svg'
@@ -22,6 +22,11 @@ import type {
     Instructor,
     Topic,
 } from '@/api/courses/index.types'
+import {
+    mergeCoursesFiltersIntoSearchString,
+    parseCoursesFilterSearch,
+    type CoursesFilterUrlState,
+} from '@/utils/coursesFilterSearchParams'
 
 const formatPrice = (value: string) => {
     const num = Number(value)
@@ -305,13 +310,7 @@ const CourseCard = ({ course }: { course: Course }) => {
 }
 
 const CoursesPage = () => {
-    const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
-    const [selectedTopicIds, setSelectedTopicIds] = useState<number[]>([])
-    const [selectedInstructorIds, setSelectedInstructorIds] = useState<
-        number[]
-    >([])
-    const [page, setPage] = useState(1)
-    const [sort, setSort] = useState<SortKey>('newest')
+    const [searchParams, setSearchParams] = useSearchParams()
     const [sortOpen, setSortOpen] = useState(false)
     const sortDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -328,6 +327,27 @@ const CoursesPage = () => {
 
     const perPage = 10
 
+    const parsedFilters = useMemo(
+        () => parseCoursesFilterSearch(`?${searchParams.toString()}`),
+        [searchParams],
+    )
+
+    const pushFilters = useCallback(
+        (patch: Partial<CoursesFilterUrlState>) => {
+            setSearchParams(
+                (prev) =>
+                    new URLSearchParams(
+                        mergeCoursesFiltersIntoSearchString(
+                            `?${prev.toString()}`,
+                            patch,
+                        ),
+                    ),
+                { replace: true },
+            )
+        },
+        [setSearchParams],
+    )
+
     const categoriesQuery = useQuery({
         queryKey: ['categories'],
         queryFn: getCategories,
@@ -343,7 +363,6 @@ const CoursesPage = () => {
     const coursesQuery = useQuery({
         queryKey: ['courses', 'all'],
         queryFn: async () => {
-            // API may cap per_page; fetch all pages.
             const fetchPerPage = 10
             let currentPage = 1
             let lastPage = 1
@@ -365,13 +384,61 @@ const CoursesPage = () => {
         },
     })
 
-    const categories = categoriesQuery.data?.data ?? []
-    const topics = topicsQuery.data?.data ?? []
-    const instructors = instructorsQuery.data?.data ?? []
-    const allCourses = coursesQuery.data?.data ?? []
+    const categories = useMemo(
+        () => categoriesQuery.data?.data ?? [],
+        [categoriesQuery.data?.data],
+    )
+    const topics = useMemo(
+        () => topicsQuery.data?.data ?? [],
+        [topicsQuery.data?.data],
+    )
+    const instructors = useMemo(
+        () => instructorsQuery.data?.data ?? [],
+        [instructorsQuery.data?.data],
+    )
+    const allCourses = useMemo(
+        () => coursesQuery.data?.data ?? [],
+        [coursesQuery.data?.data],
+    )
 
     const meta = coursesQuery.data?.meta
     const totalCount = meta?.total ?? allCourses.length
+
+    const categoryIdSet = useMemo(
+        () => new Set(categories.map((c) => c.id)),
+        [categories],
+    )
+    const topicIdSet = useMemo(() => new Set(topics.map((t) => t.id)), [topics])
+    const instructorIdSet = useMemo(
+        () => new Set(instructors.map((i) => i.id)),
+        [instructors],
+    )
+
+    const selectedCategoryIds = useMemo(
+        () => parsedFilters.categoryIds.filter((id) => categoryIdSet.has(id)),
+        [parsedFilters.categoryIds, categoryIdSet],
+    )
+
+    const selectedTopicIds = useMemo(
+        () => parsedFilters.topicIds.filter((id) => topicIdSet.has(id)),
+        [parsedFilters.topicIds, topicIdSet],
+    )
+
+    const selectedInstructorIds = useMemo(
+        () =>
+            parsedFilters.instructorIds.filter((id) => instructorIdSet.has(id)),
+        [parsedFilters.instructorIds, instructorIdSet],
+    )
+
+    const sort: SortKey = useMemo(() => {
+        const s = parsedFilters.sort
+        if (s && SORT_OPTIONS.some((o) => o.value === s)) {
+            return s as SortKey
+        }
+        return 'newest'
+    }, [parsedFilters.sort])
+
+    const pageFromUrl = parsedFilters.page
 
     const appliedFiltersCount =
         selectedCategoryIds.length +
@@ -429,7 +496,7 @@ const CoursesPage = () => {
     ])
 
     const totalPages = Math.max(1, Math.ceil(filteredCourses.length / perPage))
-    const safePage = Math.min(page, totalPages)
+    const safePage = Math.min(Math.max(1, pageFromUrl), totalPages)
     const startIdx = (safePage - 1) * perPage
     const pagedCourses = filteredCourses.slice(startIdx, startIdx + perPage)
     const showingCount = pagedCourses.length
@@ -438,10 +505,13 @@ const CoursesPage = () => {
         ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]
 
     const clearAll = () => {
-        setSelectedCategoryIds([])
-        setSelectedTopicIds([])
-        setSelectedInstructorIds([])
-        setPage(1)
+        pushFilters({
+            categoryIds: [],
+            topicIds: [],
+            instructorIds: [],
+            page: 1,
+            sort: null,
+        })
     }
 
     const isLoading =
@@ -526,8 +596,10 @@ const CoursesPage = () => {
                                                 }
                                                 className="font-inter flex w-full items-center px-3 py-2.5 text-left text-[16px] leading-6 font-medium tracking-normal text-[#666666] transition-colors hover:bg-[#EEEDFC] hover:text-[#4F46E5]"
                                                 onClick={() => {
-                                                    setSort(opt.value)
-                                                    setPage(1)
+                                                    pushFilters({
+                                                        sort: opt.value,
+                                                        page: 1,
+                                                    })
                                                     setSortOpen(false)
                                                 }}
                                             >
@@ -557,10 +629,13 @@ const CoursesPage = () => {
                                         c.id,
                                     )}
                                     onClick={() => {
-                                        setSelectedCategoryIds((prev) =>
-                                            toggleId(prev, c.id),
-                                        )
-                                        setPage(1)
+                                        pushFilters({
+                                            categoryIds: toggleId(
+                                                selectedCategoryIds,
+                                                c.id,
+                                            ),
+                                            page: 1,
+                                        })
                                     }}
                                 />
                             ))}
@@ -576,10 +651,13 @@ const CoursesPage = () => {
                                     label={t.name}
                                     selected={selectedTopicIds.includes(t.id)}
                                     onClick={() => {
-                                        setSelectedTopicIds((prev) =>
-                                            toggleId(prev, t.id),
-                                        )
-                                        setPage(1)
+                                        pushFilters({
+                                            topicIds: toggleId(
+                                                selectedTopicIds,
+                                                t.id,
+                                            ),
+                                            page: 1,
+                                        })
                                     }}
                                 />
                             ))}
@@ -597,10 +675,13 @@ const CoursesPage = () => {
                                         i.id,
                                     )}
                                     onClick={() => {
-                                        setSelectedInstructorIds((prev) =>
-                                            toggleId(prev, i.id),
-                                        )
-                                        setPage(1)
+                                        pushFilters({
+                                            instructorIds: toggleId(
+                                                selectedInstructorIds,
+                                                i.id,
+                                            ),
+                                            page: 1,
+                                        })
                                     }}
                                 />
                             ))}
@@ -616,6 +697,12 @@ const CoursesPage = () => {
                         {isLoading ? (
                             <div className="font-inter text-[16px] leading-6 font-medium text-[#666666]">
                                 Loading...
+                            </div>
+                        ) : filteredCourses.length === 0 ? (
+                            <div className="flex min-h-[min(50vh,28rem)] w-full flex-col items-center justify-center px-4 py-16">
+                                <h2 className="font-inter text-center text-[28px] leading-tight font-semibold tracking-normal text-[#141414] sm:text-[32px]">
+                                    No Course to Display
+                                </h2>
                             </div>
                         ) : (
                             <div className="grid grid-cols-3 content-start gap-6">
@@ -642,13 +729,13 @@ const CoursesPage = () => {
                     </div>
                 </div>
 
-                {!isLoading ? (
+                {!isLoading && filteredCourses.length > 0 ? (
                     <div className="mt-auto flex w-full justify-center pt-8">
                         <CoursesPagination
                             page={safePage}
                             totalPages={totalPages}
                             onPageChange={(p) => {
-                                setPage(p)
+                                pushFilters({ page: p })
                                 window.scrollTo({ top: 0, behavior: 'auto' })
                             }}
                         />
