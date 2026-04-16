@@ -26,7 +26,6 @@ function fillForStar(average01to5: number, starIndex: number): number {
     return clamp01(average01to5 - starIndex)
 }
 
-/** Integer 1–5: stars 1…N fully orange, rest gray. */
 function fillForDiscretePick(rating: number, starIndex: number): number {
     return rating > starIndex ? 1 : 0
 }
@@ -78,14 +77,11 @@ function StarButton({
 export type RateYourExperienceProps = {
     courseId: number
     averageRating: number
-    /** Panel close (X). Unused when `showCloseButton` is false. */
     onDismiss?: () => void
-    /** Default true. Set false when embedded (e.g. congratulations modal). */
     showCloseButton?: boolean
-    /** Default card under the sidebar; `embedded` drops outer spacing and close control. */
     variant?: 'default' | 'embedded'
-    /** Suffix for star clip-path ids when multiple instances exist. */
     instanceId?: string
+    enrollmentId?: number
 }
 
 export default function RateYourExperience({
@@ -95,12 +91,10 @@ export default function RateYourExperience({
     showCloseButton = true,
     variant = 'default',
     instanceId = 'default',
+    enrollmentId,
 }: RateYourExperienceProps) {
     const queryClient = useQueryClient()
-    /**
-     * `null` → show stars from course average (fractional).
-     * 1–5 → show your rating (full orange stars); kept after a successful submit.
-     */
+
     const [pickedRating, setPickedRating] = useState<number | null>(null)
 
     const avg = Number.isFinite(averageRating)
@@ -108,7 +102,8 @@ export default function RateYourExperience({
         : 0
 
     const reviewMutation = useMutation({
-        mutationFn: (rating: number) => submitCourseReview(courseId, rating),
+        mutationFn: (rating: number) =>
+            submitCourseReview(courseId, rating, enrollmentId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['course', courseId] })
         },
@@ -129,10 +124,9 @@ export default function RateYourExperience({
         reviewMutation.mutate(rating)
     }
 
-    const errorMessage =
-        reviewMutation.isError ?
-            messageFromReviewError(reviewMutation.error)
-        :   null
+    const errorMessage = reviewMutation.isError
+        ? messageFromReviewError(reviewMutation.error)
+        : null
 
     const clipKey = `${instanceId}`
     const isEmbedded = variant === 'embedded'
@@ -140,12 +134,12 @@ export default function RateYourExperience({
     return (
         <div
             className={`relative box-border rounded-lg bg-white ${
-                isEmbedded ?
-                    'w-full max-w-full px-6 py-4'
-                :   'mt-6.25 min-h-43 w-132.5 max-w-full px-6 pb-6'
+                isEmbedded
+                    ? 'w-full max-w-full px-6 py-4'
+                    : 'mt-6.25 min-h-43 w-132.5 max-w-full px-6 pb-6'
             }`}
         >
-            {showCloseButton ?
+            {showCloseButton ? (
                 <button
                     type="button"
                     onClick={onDismiss}
@@ -168,7 +162,7 @@ export default function RateYourExperience({
                         />
                     </svg>
                 </button>
-            :   null}
+            ) : null}
 
             <div
                 className={`flex flex-col items-center ${isEmbedded ? 'pt-0' : 'pt-10'}`}
@@ -194,14 +188,14 @@ export default function RateYourExperience({
                     ))}
                 </div>
 
-                {errorMessage ?
+                {errorMessage ? (
                     <p
                         role="alert"
                         className="font-inter mt-5 max-w-full text-center text-[16px] leading-6 font-medium text-[#DC2626]"
                     >
                         {errorMessage}
                     </p>
-                :   null}
+                ) : null}
             </div>
         </div>
     )

@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 import { httpClient } from '@/api'
 
 import {
@@ -64,8 +66,29 @@ export async function getCourseTimeSlots(
     return res.data.data
 }
 
-export async function submitCourseReview(courseId: number, rating: number) {
-    await httpClient.post(`/courses/${courseId}/reviews`, { rating })
+/**
+ * Submits a rating for the course. Sends `enrollment_id` when provided so the backend
+ * can record a review for a specific enrollment (e.g. after retake + complete again).
+ * If POST fails with “already rated”, retries with PUT (update existing review).
+ */
+export async function submitCourseReview(
+    courseId: number,
+    rating: number,
+    enrollmentId?: number,
+) {
+    const payload: { rating: number; enrollment_id?: number } = { rating }
+    if (enrollmentId != null) payload.enrollment_id = enrollmentId
+
+    try {
+        await httpClient.post(`/courses/${courseId}/reviews`, payload)
+    } catch (e) {
+        if (!axios.isAxiosError(e) || e.response?.status !== 422) throw e
+        const raw = e.response?.data as { message?: unknown } | undefined
+        const msg =
+            typeof raw?.message === 'string' ? raw.message : ''
+        if (!/already\s+rated/i.test(msg)) throw e
+        await httpClient.put(`/courses/${courseId}/reviews`, payload)
+    }
 }
 
 export async function getCourseSessionTypes(

@@ -26,6 +26,7 @@ import {
 } from '@/pages/course-details/components/session-type'
 import EnrolledState from '@/pages/course-details/components/enrolled-state'
 import EnrollmentConflictModal from '@/pages/course-details/components/modals/enrollment-conflict'
+import CompleteProfileModal from '@/pages/course-details/components/modals/complete-profile-modal'
 import EnrollmentModal from '@/pages/course-details/components/modals/enrollment-modal'
 import TotalPrice from '@/pages/course-details/components/total-price'
 import { EnrollmentWarning } from '@/pages/course-details/components/warnings'
@@ -389,6 +390,8 @@ export default function WeeklySchedule({
     const [timeSlotOpen, setTimeSlotOpen] = useState(false)
     const [sessionTypeOpen, setSessionTypeOpen] = useState(false)
     const [enrollmentSuccessOpen, setEnrollmentSuccessOpen] = useState(false)
+    const [completeProfileModalOpen, setCompleteProfileModalOpen] =
+        useState(false)
     const [conflictOpen, setConflictOpen] = useState(false)
     const [conflictCourseName, setConflictCourseName] = useState('')
     const [conflictScheduleSummary, setConflictScheduleSummary] = useState('')
@@ -793,6 +796,9 @@ export default function WeeklySchedule({
                     isLoggedIn={isLoggedIn}
                     profileComplete={profileComplete}
                     enrollPending={enrollMutation.isPending}
+                    onNeedCompleteProfile={() =>
+                        setCompleteProfileModalOpen(true)
+                    }
                     onEnroll={() => {
                         if (
                             selectedCourseScheduleId == null ||
@@ -836,6 +842,14 @@ export default function WeeklySchedule({
                 open={enrollmentSuccessOpen}
                 onClose={() => setEnrollmentSuccessOpen(false)}
                 courseTitle={courseTitle}
+            />
+            <CompleteProfileModal
+                open={completeProfileModalOpen}
+                onClose={() => setCompleteProfileModalOpen(false)}
+                onCompleteProfile={() => {
+                    setCompleteProfileModalOpen(false)
+                    openProfileModal()
+                }}
             />
         </>
     )
