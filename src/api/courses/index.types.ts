@@ -93,13 +93,17 @@ export type CourseEnrollmentSchedule = {
 
 export type CourseEnrollmentDetail = {
     id: number
-    quantity: number
-    totalPrice: number
+    totalPrice: number | string
     progress: number
     completedAt: string | null
     course?: {
         id: number
         title: string
+        description?: string
+        image?: string
+        basePrice?: string
+        avgRating?: number
+        instructor?: Instructor
     }
     schedule?: CourseEnrollmentSchedule
 }
