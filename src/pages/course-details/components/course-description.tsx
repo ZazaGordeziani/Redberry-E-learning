@@ -184,7 +184,9 @@ const CourseDescription = () => {
                             <WeeklySchedule
                                 key={course.id}
                                 courseId={course.id}
+                                courseTitle={course.title}
                                 basePrice={String(course.basePrice)}
+                                enrollment={course.enrollment ?? null}
                                 className="mt-28 ml-25 w-full max-w-full"
                             />
                         </aside>

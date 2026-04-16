@@ -243,7 +243,10 @@ const InstructorItem = ({
 
 const CourseCard = ({ course }: { course: Course }) => {
     return (
-        <article className="flex h-107 w-93.25 flex-col overflow-hidden rounded-xl border border-[#F5F5F5] bg-white p-5 shadow-[0px_4px_20px_0px_#00000014]">
+        <Link
+            to={`/courses/${course.id}`}
+            className="flex h-107 w-93.25 flex-col overflow-hidden rounded-xl border border-[#F5F5F5] bg-white p-5 text-left shadow-[0px_4px_20px_0px_#00000014] transition-shadow hover:shadow-[0px_8px_28px_0px_#0000001f]"
+        >
             <div className="overflow-hidden">
                 <img
                     src={course.image}
@@ -297,15 +300,12 @@ const CourseCard = ({ course }: { course: Course }) => {
                         </p>
                     </div>
 
-                    <Link
-                        to={`/courses/${course.id}`}
-                        className="font-inter inline-flex rounded-lg bg-[#4F46E5] px-4.25 py-2.5 text-center text-[16px] leading-6 font-medium text-white"
-                    >
+                    <span className="font-inter inline-flex shrink-0 items-center rounded-lg bg-[#4F46E5] px-4.25 py-2.5 text-center text-[16px] leading-6 font-medium text-white">
                         Details
-                    </Link>
+                    </span>
                 </div>
             </div>
-        </article>
+        </Link>
     )
 }
 

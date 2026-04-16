@@ -71,17 +71,22 @@ export type CourseTimeSlotOption = {
 export type CourseEnrollmentSchedule = {
     weeklySchedule?: {
         id: number
-        label: string
-        days: string[]
+        label?: string
+        days?: string[]
     }
-    timeSlot?: CourseTimeSlot
+    timeSlot?: {
+        id: number
+        label?: string
+        startTime?: string
+        endTime?: string
+    }
     sessionType?: {
         id: number
-        courseScheduleId: number
-        name: string
-        priceModifier: number
-        availableSeats: number
-        location: string
+        courseScheduleId?: number
+        name?: string
+        priceModifier?: number | string
+        availableSeats?: number
+        location?: string
     }
     location?: string
 }
@@ -92,6 +97,10 @@ export type CourseEnrollmentDetail = {
     totalPrice: number
     progress: number
     completedAt: string | null
+    course?: {
+        id: number
+        title: string
+    }
     schedule?: CourseEnrollmentSchedule
 }
 
