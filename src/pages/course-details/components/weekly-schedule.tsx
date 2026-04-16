@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { getCourseWeeklySchedules } from '@/api/courses'
+import { SessionTypesPicker } from '@/pages/course-details/components/session-type'
 import { TimeSlotsPicker } from '@/pages/course-details/components/time-slots'
 import type { WeeklySchedule as WeeklyScheduleApi } from '@/api/courses/index.types'
 
@@ -316,15 +317,22 @@ export default function WeeklySchedule({
     const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<number | null>(
         null,
     )
+    const [selectedSessionTypeId, setSelectedSessionTypeId] = useState<
+        number | null
+    >(null)
 
     const timeSlotUnlocked = selectedWeeklyId !== null
-    const sessionTypeUnlocked = false
+    const sessionTypeUnlocked = selectedTimeSlotId !== null
 
     const timeSlotExpanded = timeSlotUnlocked && timeSlotOpen
+    const sessionTypeExpanded = sessionTypeUnlocked && sessionTypeOpen
 
     const weeklyBadgeOutline = weeklyOpen || selectedWeeklyId === null
 
     const timeSlotBadgeOutline = timeSlotOpen || selectedTimeSlotId === null
+
+    const sessionTypeBadgeOutline =
+        sessionTypeOpen || selectedSessionTypeId === null
 
     const {
         data: weeklySchedules = [],
@@ -385,6 +393,7 @@ export default function WeeklySchedule({
                                 onSelect={(id) => {
                                     setSelectedWeeklyId(id)
                                     setSelectedTimeSlotId(null)
+                                    setSelectedSessionTypeId(null)
                                 }}
                             />
                         )}
@@ -407,7 +416,10 @@ export default function WeeklySchedule({
                         weeklyScheduleId={selectedWeeklyId}
                         enabled={timeSlotUnlocked}
                         selectedId={selectedTimeSlotId}
-                        onSelect={setSelectedTimeSlotId}
+                        onSelect={(id) => {
+                            setSelectedTimeSlotId(id)
+                            setSelectedSessionTypeId(null)
+                        }}
                     />
                 ) : null}
             </div>
@@ -416,10 +428,23 @@ export default function WeeklySchedule({
                 <AccordionHeader
                     step={3}
                     title="Session Type"
-                    expanded={sessionTypeOpen}
+                    expanded={sessionTypeExpanded}
                     disabled={!sessionTypeUnlocked}
                     onToggle={toggleSessionType}
+                    badgeShowsOutline={sessionTypeBadgeOutline}
                 />
+                {sessionTypeExpanded &&
+                selectedWeeklyId != null &&
+                selectedTimeSlotId != null ? (
+                    <SessionTypesPicker
+                        courseId={courseId}
+                        weeklyScheduleId={selectedWeeklyId}
+                        timeSlotId={selectedTimeSlotId}
+                        enabled={sessionTypeUnlocked}
+                        selectedId={selectedSessionTypeId}
+                        onSelect={setSelectedSessionTypeId}
+                    />
+                ) : null}
             </div>
         </div>
     )

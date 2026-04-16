@@ -1,14 +1,15 @@
 import { httpClient } from '@/api'
 
-import type {
-    Category,
-    Course,
-    CourseDetail,
-    CourseTimeSlotOption,
-    Instructor,
-    ListResponse,
-    Topic,
-    WeeklySchedule,
+import {
+    type Category,
+    type Course,
+    type CourseDetail,
+    type CourseTimeSlotOption,
+    type Instructor,
+    type ListResponse,
+    parseCourseSessionTypeOption,
+    type Topic,
+    type WeeklySchedule,
 } from './index.types'
 
 export async function getCategories() {
@@ -63,3 +64,20 @@ export async function getCourseTimeSlots(
     return res.data.data
 }
 
+export async function getCourseSessionTypes(
+    courseId: number,
+    weeklyScheduleId: number,
+    timeSlotId: number,
+) {
+    const res = await httpClient.get<ListResponse<Record<string, unknown>>>(
+        `/courses/${courseId}/session-types`,
+        {
+            params: {
+                weekly_schedule_id: weeklyScheduleId,
+                time_slot_id: timeSlotId,
+            },
+        },
+    )
+    const rows = res.data.data ?? []
+    return rows.map((row) => parseCourseSessionTypeOption(row))
+}

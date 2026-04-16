@@ -96,6 +96,52 @@ export type CourseEnrollmentDetail = {
     schedule?: CourseEnrollmentSchedule
 }
 
+/** Session type options from `GET /courses/:id/session-types` */
+export type CourseSessionTypeOption = {
+    id: number
+    courseScheduleId: number
+    name: string
+    priceModifier: string
+    availableSeats: number
+    location: string
+}
+
+/**
+ * Maps Laravel / mixed JSON (camelCase or snake_case, optional venue keys) into our shape.
+ */
+export function parseCourseSessionTypeOption(
+    raw: Record<string, unknown>,
+): CourseSessionTypeOption {
+    const num = (v: unknown, fallback = 0) => {
+        const n = Number(v)
+        return Number.isFinite(n) ? n : fallback
+    }
+    const str = (v: unknown) => (v == null ? '' : String(v))
+
+    const locCandidates = [
+        raw.location,
+        raw.venue,
+        raw.address,
+        raw.campus,
+        raw.campus_name,
+    ]
+    const location =
+        locCandidates
+            .map((v) => (v == null ? '' : String(v).trim()))
+            .find((s) => s.length > 0) ?? ''
+
+    return {
+        id: num(raw.id),
+        courseScheduleId: num(
+            raw.courseScheduleId ?? raw.course_schedule_id,
+        ),
+        name: str(raw.name),
+        priceModifier: str(raw.priceModifier ?? raw.price_modifier ?? '0'),
+        availableSeats: num(raw.availableSeats ?? raw.available_seats),
+        location,
+    }
+}
+
 export type WeeklySchedule = {
     id: number
     label: string
