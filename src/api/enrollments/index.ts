@@ -38,3 +38,7 @@ export async function completeEnrollment(enrollmentId: number) {
     }>(`/enrollments/${enrollmentId}/complete`)
     return res.data.data
 }
+
+export async function deleteEnrollment(enrollmentId: number) {
+    await httpClient.delete(`/enrollments/${enrollmentId}`)
+}

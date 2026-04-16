@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type { CourseEnrollmentDetail } from '@/api/courses/index.types'
-import { completeEnrollment } from '@/api/enrollments'
+import { completeEnrollment, deleteEnrollment } from '@/api/enrollments'
 import {
     displaySessionTitle,
     normalizeSessionKind,
@@ -124,7 +124,9 @@ export default function EnrolledState({
     const sessionNameRaw = schedule?.sessionType?.name?.trim() ?? ''
 
     const completed = isEnrollmentCompleted(enrollment)
-    const progressPct = completed ? 100 : Math.min(100, Math.max(0, enrollment.progress))
+    const progressPct = completed
+        ? 100
+        : Math.min(100, Math.max(0, enrollment.progress))
 
     const completeMutation = useMutation({
         mutationFn: () => completeEnrollment(enrollment.id),
@@ -135,144 +137,163 @@ export default function EnrolledState({
         },
     })
 
+    const retakeMutation = useMutation({
+        mutationFn: () => deleteEnrollment(enrollment.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['course', courseId] })
+            queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+        },
+    })
+
     return (
         <>
-        <div className="flex w-full flex-col">
-            <span
-                className={`font-inter inline-flex w-fit rounded-full px-4 py-2 text-[20px] leading-6 font-semibold ${
-                    completed ?
-                        'bg-[#1DC31D]/10 text-[#1DC31D]'
-                    :   'bg-[#736BEA]/10 text-[#736BEA]'
-                }`}
-            >
-                {completed ? 'Completed' : 'Enrolled'}
-            </span>
+            <div className="flex w-full flex-col">
+                <span
+                    className={`font-inter inline-flex w-fit rounded-full px-4 py-2 text-[20px] leading-6 font-semibold ${
+                        completed
+                            ? 'bg-[#1DC31D]/10 text-[#1DC31D]'
+                            : 'bg-[#736BEA]/10 text-[#736BEA]'
+                    }`}
+                >
+                    {completed ? 'Completed' : 'Enrolled'}
+                </span>
 
-            <div className="mt-6 mb-5 flex flex-col gap-7">
-                <InfoRow
-                    icon={
-                        <img
-                            src={calendar2Icon}
-                            alt=""
-                            aria-hidden
-                            className="h-6 w-6 shrink-0"
-                        />
-                    }
-                    label={enrollmentWeekLabel(schedule)}
-                />
-                <InfoRow
-                    icon={
-                        <img
-                            src={clockIcon}
-                            alt=""
-                            aria-hidden
-                            className="h-6 w-6 shrink-0"
-                        />
-                    }
-                    label={enrollmentTimeLabel(schedule)}
-                />
-                <div className="flex items-center gap-3">
-                    {sessionNameRaw.length > 0 ? (
-                        <SessionTypeKindIcon name={sessionNameRaw} />
-                    ) : (
-                        <span
-                            className="inline-block h-6 w-6 shrink-0"
-                            aria-hidden
-                        />
-                    )}
-                    <span className="font-inter text-[20px] leading-[100%] font-medium text-[#525252]">
-                        {sessionNameRaw.length > 0
-                            ? enrollmentSessionName(schedule)
-                            : '—'}
-                    </span>
-                </div>
-                <InfoRow
-                    icon={
-                        <img
-                            src={locationIcon}
-                            alt=""
-                            aria-hidden
-                            className="h-6 w-6 shrink-0"
-                        />
-                    }
-                    label={enrollmentLocationLine(schedule)}
-                />
-            </div>
-
-            <p className="font-inter mt-8 mb-4 align-middle text-[20px] leading-6 font-semibold text-[#666666]">
-                {progressPct}% Complete
-            </p>
-
-            <div
-                className="mt-1 w-full"
-                role={completed ? undefined : 'progressbar'}
-                aria-valuenow={completed ? undefined : progressPct}
-                aria-valuemin={completed ? undefined : 0}
-                aria-valuemax={completed ? undefined : 100}
-            >
-                {completed ?
-                    <img
-                        src={completedSvg}
-                        alt=""
-                        aria-hidden
-                        className="block h-auto w-full max-w-full"
+                <div className="mt-6 mb-5 flex flex-col gap-7">
+                    <InfoRow
+                        icon={
+                            <img
+                                src={calendar2Icon}
+                                alt=""
+                                aria-hidden
+                                className="h-6 w-6 shrink-0"
+                            />
+                        }
+                        label={enrollmentWeekLabel(schedule)}
                     />
-                :   <div className="h-6 w-full overflow-hidden rounded-[11.75px] bg-[#DDDBFA]">
-                        <div
-                            className="h-full min-w-0 rounded-[11.75px] bg-[#4F46E5] transition-[width] duration-300 ease-out"
-                            style={{ width: `${progressPct}%` }}
-                        />
+                    <InfoRow
+                        icon={
+                            <img
+                                src={clockIcon}
+                                alt=""
+                                aria-hidden
+                                className="h-6 w-6 shrink-0"
+                            />
+                        }
+                        label={enrollmentTimeLabel(schedule)}
+                    />
+                    <div className="flex items-center gap-3">
+                        {sessionNameRaw.length > 0 ? (
+                            <SessionTypeKindIcon name={sessionNameRaw} />
+                        ) : (
+                            <span
+                                className="inline-block h-6 w-6 shrink-0"
+                                aria-hidden
+                            />
+                        )}
+                        <span className="font-inter text-[20px] leading-[100%] font-medium text-[#525252]">
+                            {sessionNameRaw.length > 0
+                                ? enrollmentSessionName(schedule)
+                                : '—'}
+                        </span>
                     </div>
-                }
-            </div>
+                    <InfoRow
+                        icon={
+                            <img
+                                src={locationIcon}
+                                alt=""
+                                aria-hidden
+                                className="h-6 w-6 shrink-0"
+                            />
+                        }
+                        label={enrollmentLocationLine(schedule)}
+                    />
+                </div>
 
-            {completed ?
-                <>
+                <p className="font-inter mt-8 mb-4 align-middle text-[20px] leading-6 font-semibold text-[#666666]">
+                    {progressPct}% Complete
+                </p>
+
+                <div
+                    className="mt-1 w-full"
+                    role={completed ? undefined : 'progressbar'}
+                    aria-valuenow={completed ? undefined : progressPct}
+                    aria-valuemin={completed ? undefined : 0}
+                    aria-valuemax={completed ? undefined : 100}
+                >
+                    {completed ? (
+                        <img
+                            src={completedSvg}
+                            alt=""
+                            aria-hidden
+                            className="block h-auto w-full max-w-full"
+                        />
+                    ) : (
+                        <div className="h-6 w-full overflow-hidden rounded-[11.75px] bg-[#DDDBFA]">
+                            <div
+                                className="h-full min-w-0 rounded-[11.75px] bg-[#4F46E5] transition-[width] duration-300 ease-out"
+                                style={{ width: `${progressPct}%` }}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {completed ? (
+                    <>
+                        <button
+                            type="button"
+                            disabled={retakeMutation.isPending}
+                            onClick={() => retakeMutation.mutate()}
+                            className="font-inter mt-9 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-4 text-[20px] leading-[100%] font-medium text-white transition-colors hover:bg-[#4338CA] disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                            {retakeMutation.isPending
+                                ? 'Removing…'
+                                : 'Retake Course'}
+                            <img
+                                src={retakeIcon}
+                                alt=""
+                                aria-hidden
+                                className="h-5.5 w-5.5 shrink-0"
+                            />
+                        </button>
+                        {!rateCardDismissed && !completeCongratsOpen ? (
+                            <RateYourExperience
+                                key={`sidebar-rate-${courseId}-${enrollment.id}`}
+                                averageRating={averageRating}
+                                courseId={courseId}
+                                enrollmentId={enrollment.id}
+                                instanceId={`sidebar-${enrollment.id}`}
+                                onDismiss={() => setRateCardDismissed(true)}
+                            />
+                        ) : null}
+                    </>
+                ) : (
                     <button
                         type="button"
-                        className="font-inter mt-9 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-4 text-[20px] leading-[100%] font-medium text-white transition-colors hover:bg-[#4338CA]"
+                        disabled={completeMutation.isPending}
+                        onClick={() => completeMutation.mutate()}
+                        className="font-inter mt-9 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-4 text-[20px] leading-[100%] font-medium text-white transition-colors hover:bg-[#4338CA] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                        Retake Course
+                        {completeMutation.isPending
+                            ? 'Completing…'
+                            : 'Complete Course'}
                         <img
-                            src={retakeIcon}
+                            src={checkmarkIcon}
                             alt=""
                             aria-hidden
                             className="h-5.5 w-5.5 shrink-0"
                         />
                     </button>
-                    {!rateCardDismissed && !completeCongratsOpen ?
-                        <RateYourExperience
-                            averageRating={averageRating}
-                            courseId={courseId}
-                            instanceId="sidebar"
-                            onDismiss={() => setRateCardDismissed(true)}
-                        />
-                    :   null}
-                </>
-            :   <button
-                    type="button"
-                    disabled={completeMutation.isPending}
-                    onClick={() => completeMutation.mutate()}
-                    className="font-inter mt-9 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4F46E5] py-4 text-[20px] leading-[100%] font-medium text-white transition-colors hover:bg-[#4338CA] disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                    {completeMutation.isPending ? 'Completing…' : 'Complete Course'}
-                    <img
-                        src={checkmarkIcon}
-                        alt=""
-                        aria-hidden
-                        className="h-5.5 w-5.5 shrink-0"
-                    />
-                </button>
-            }
-        </div>
+                )}
+            </div>
 
-        <CompleteCourseCongratulationsModal
-            open={completeCongratsOpen}
-            onClose={() => setCompleteCongratsOpen(false)}
-            averageRating={averageRating}
-            courseId={courseId}
-            courseTitle={courseTitle}
-        />
+            <CompleteCourseCongratulationsModal
+                open={completeCongratsOpen}
+                onClose={() => setCompleteCongratsOpen(false)}
+                averageRating={averageRating}
+                courseId={courseId}
+                courseTitle={courseTitle}
+                enrollmentId={enrollment.id}
+            />
         </>
     )
 }

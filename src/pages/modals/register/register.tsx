@@ -9,7 +9,10 @@ import hidePasswordIcon from '@/assets/hide-password.svg'
 import showPasswordIcon from '@/assets/show-password.svg'
 import uploadAvatarIcon from '@/assets/upload-avatar.svg'
 
+import { useSetAtom } from 'jotai'
+
 import { useRegister } from '@/react-query/mutation'
+import { userAtom } from '@/store/auth'
 
 import {
     type BackendErrorResponse,
@@ -50,6 +53,7 @@ const StepBars = ({ step }: { step: 0 | 1 | 2 }) => {
 }
 
 export const Register = ({ open, onClose, onOpenLogin }: Props) => {
+    const setUser = useSetAtom(userAtom)
     const avatarRef = useRef<HTMLInputElement>(null)
     const [step, setStep] = useState<0 | 1 | 2>(0)
     const [showPassword, setShowPassword] = useState(true)
@@ -97,7 +101,24 @@ export const Register = ({ open, onClose, onOpenLogin }: Props) => {
                 setFormError(data?.message ?? 'Registration failed')
             }
         },
-        onSuccess: () => {
+        onSuccess: (data) => {
+            if (data?.token) localStorage.setItem('token', data.token)
+            if (data?.user?.email)
+                localStorage.setItem('email', data.user.email)
+            if (data?.user?.username)
+                localStorage.setItem('username', data.user.username)
+            setUser({
+                id: data?.user?.id,
+                email: data?.user?.email,
+                username: data?.user?.username,
+                token: data?.token,
+                avatar: data?.user?.avatar ?? undefined,
+                fullName: data?.user?.fullName ?? null,
+                mobileNumber: data?.user?.mobileNumber ?? null,
+                age: data?.user?.age ?? null,
+                profileComplete: data?.user?.profileComplete ?? false,
+            })
+            window.scrollTo({ top: 0, behavior: 'auto' })
             onClose()
         },
     })

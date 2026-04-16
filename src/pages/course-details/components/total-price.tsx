@@ -26,6 +26,7 @@ export type TotalPriceProps = {
     sessionKind: 'online' | 'in_person' | 'hybrid' | null
     isLoggedIn: boolean
     profileComplete: boolean
+    onNeedCompleteProfile?: () => void
     onEnroll?: () => void
     enrollPending?: boolean
 }
@@ -36,6 +37,7 @@ export function TotalPrice({
     sessionKind,
     isLoggedIn,
     profileComplete,
+    onNeedCompleteProfile,
     onEnroll,
     enrollPending = false,
 }: TotalPriceProps) {
@@ -46,8 +48,9 @@ export function TotalPrice({
             : 0
     const total = baseNum + sessionAddon
 
-    const canEnroll = selectionComplete && isLoggedIn && profileComplete
-    const enrollDisabled = !canEnroll || enrollPending
+    const canUseEnrollButton = selectionComplete && isLoggedIn && !enrollPending
+    const enrollDisabled = !selectionComplete || !isLoggedIn || enrollPending
+    const needsProfileOnly = canUseEnrollButton && !profileComplete
 
     return (
         <div className="w-full rounded-xl border border-[#F5F5F5] bg-white p-6">
@@ -82,11 +85,20 @@ export function TotalPrice({
             <button
                 type="button"
                 disabled={enrollDisabled}
-                onClick={() => canEnroll && !enrollPending && onEnroll?.()}
+                onClick={() => {
+                    if (!canUseEnrollButton) return
+                    if (!profileComplete) {
+                        onNeedCompleteProfile?.()
+                        return
+                    }
+                    onEnroll?.()
+                }}
                 className={`font-inter mt-8 mb-3 w-full rounded-xl py-4 text-center text-[20px] leading-6 font-semibold transition-colors ${
-                    canEnroll && !enrollPending
-                        ? 'cursor-pointer bg-[#281ED2] text-white hover:bg-[#4F46E5]'
-                        : 'cursor-not-allowed bg-[#EEEDFC] text-[#B7B3F4]'
+                    enrollDisabled ?
+                        'cursor-not-allowed bg-[#EEEDFC] text-[#B7B3F4]'
+                    : needsProfileOnly ?
+                        'cursor-pointer bg-[#EEEDFC] text-[#B7B3F4]'
+                    :   'cursor-pointer bg-[#281ED2] text-white hover:bg-[#4F46E5]'
                 }`}
             >
                 {enrollPending ? 'Enrolling…' : 'Enroll Now'}

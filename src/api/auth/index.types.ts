@@ -26,6 +26,10 @@ export type RegisterResponse = {
         username: string
         email: string
         avatar?: string | null
+        fullName?: string | null
+        mobileNumber?: string | null
+        age?: number | null
+        profileComplete?: boolean
     }
     token: string
 }

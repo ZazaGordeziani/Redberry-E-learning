@@ -7,6 +7,7 @@ export type CompleteCourseCongratulationsModalProps = {
     courseTitle: string
     courseId: number
     averageRating: number
+    enrollmentId: number
 }
 
 export default function CompleteCourseCongratulationsModal({
@@ -15,6 +16,7 @@ export default function CompleteCourseCongratulationsModal({
     courseTitle,
     courseId,
     averageRating,
+    enrollmentId,
 }: CompleteCourseCongratulationsModalProps) {
     if (!open) return null
 
@@ -55,9 +57,11 @@ export default function CompleteCourseCongratulationsModal({
 
                     <div className="mt-5 w-full max-w-118.25">
                         <RateYourExperience
+                            key={`congrats-rate-${courseId}-${enrollmentId}`}
                             averageRating={averageRating}
                             courseId={courseId}
-                            instanceId="complete-modal"
+                            enrollmentId={enrollmentId}
+                            instanceId={`complete-modal-${enrollmentId}`}
                             showCloseButton={false}
                             variant="embedded"
                         />
