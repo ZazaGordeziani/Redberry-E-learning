@@ -54,6 +54,16 @@ function sessionKindIcon(kind: ReturnType<typeof normalizeSessionKind>) {
     if (kind === 'in_person') return inpersonSvgRaw
     return hybridSvgRaw
 }
+
+/** USD add-on for session type (aligned with priceLineForSession). */
+export function sessionSurchargeUsd(
+    kind: 'online' | 'in_person' | 'hybrid',
+): number {
+    if (kind === 'online') return 0
+    if (kind === 'in_person') return 30
+    return 50
+}
+
 //eslint-disable-next-line
 export function priceLineForSession(
     kind: 'online' | 'in_person' | 'hybrid',

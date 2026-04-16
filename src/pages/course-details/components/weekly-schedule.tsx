@@ -1,3 +1,4 @@
+import { useAtomValue } from 'jotai'
 import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -7,7 +8,13 @@ import {
     getCourseTimeSlots,
     getCourseWeeklySchedules,
 } from '@/api/courses'
-import { SessionTypesPicker } from '@/pages/course-details/components/session-type'
+import {
+    mergeSessionTypesWithPresets,
+    SessionTypesPicker,
+} from '@/pages/course-details/components/session-type'
+import TotalPrice from '@/pages/course-details/components/total-price'
+import { EnrollmentWarning } from '@/pages/course-details/components/warnings'
+import { userAtom } from '@/store/auth'
 import {
     mergeTimeSlotsWithPresets,
     TimeSlotsPicker,
@@ -313,13 +320,19 @@ function WeeklyScheduleCards({
 
 export type WeeklyScheduleProps = {
     courseId: number
+    basePrice: string
     className?: string
 }
 
 export default function WeeklySchedule({
     courseId,
+    basePrice,
     className = '',
 }: WeeklyScheduleProps) {
+    const user = useAtomValue(userAtom)
+    const isLoggedIn = !!user?.token
+    const profileComplete = user?.profileComplete === true
+
     const [searchParams, setSearchParams] = useSearchParams()
 
     const [weeklyOpen, setWeeklyOpen] = useState(true)
@@ -341,6 +354,28 @@ export default function WeeklySchedule({
         },
         [setSearchParams],
     )
+
+    const openLoginModal = useCallback(() => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev.toString())
+                next.set('auth', 'login')
+                return next
+            },
+            { replace: true },
+        )
+    }, [setSearchParams])
+
+    const openProfileModal = useCallback(() => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev.toString())
+                next.set('profile', '1')
+                return next
+            },
+            { replace: true },
+        )
+    }, [setSearchParams])
 
     const {
         data: weeklySchedules = [],
@@ -457,6 +492,22 @@ export default function WeeklySchedule({
         urlSessionTypeOk,
         sessionTypesForUrlPending,
     ])
+
+    const sessionTypeRows = useMemo(
+        () => mergeSessionTypesWithPresets(sessionTypesForUrl),
+        [sessionTypesForUrl],
+    )
+
+    const selectedSessionKind = useMemo(() => {
+        if (selectedSessionTypeId == null) return null
+        const row = sessionTypeRows.find((r) => r.id === selectedSessionTypeId)
+        return row?.kind ?? null
+    }, [sessionTypeRows, selectedSessionTypeId])
+
+    const selectionComplete =
+        selectedWeeklyId != null &&
+        selectedTimeSlotId != null &&
+        selectedSessionTypeId != null
 
     const timeSlotUnlocked = selectedWeeklyId !== null
     const sessionTypeUnlocked = selectedTimeSlotId !== null
@@ -586,6 +637,26 @@ export default function WeeklySchedule({
                     />
                 ) : null}
             </div>
+
+            <TotalPrice
+                basePrice={basePrice}
+                selectionComplete={selectionComplete}
+                sessionKind={selectedSessionKind}
+                isLoggedIn={isLoggedIn}
+                profileComplete={profileComplete}
+            />
+
+            {!isLoggedIn ? (
+                <EnrollmentWarning
+                    variant="auth"
+                    onAction={openLoginModal}
+                />
+            ) : !profileComplete ? (
+                <EnrollmentWarning
+                    variant="profile"
+                    onAction={openProfileModal}
+                />
+            ) : null}
         </div>
     )
 }
